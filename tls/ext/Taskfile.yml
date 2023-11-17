@@ -1,0 +1,13 @@
+version: "3"
+
+set: [errexit, nounset, pipefail, xtrace]
+
+tasks:
+  clean:
+    cmds:
+      - rm -r dist || echo "no 'dist' dir to remove"
+
+  build:
+    deps: [clean]
+    cmds:
+      - npm run build

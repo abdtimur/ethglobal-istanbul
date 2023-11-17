@@ -1,0 +1,18 @@
+{
+  "name": "hack_source",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abdtimur/ethglobal-istanbul"
+  },
+  "files": [
+    "hack_source_bg.wasm",
+    "hack_source.js",
+    "hack_source.d.ts"
+  ],
+  "module": "hack_source.js",
+  "types": "hack_source.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

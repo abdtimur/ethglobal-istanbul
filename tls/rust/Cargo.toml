@@ -1,0 +1,16 @@
+[workspace]
+members = [
+  "source",
+]
+resolver = "2"
+
+
+[workspace.package]
+edition = "2021"
+repository = "https://github.com/abdtimur/ethglobal-istanbul"
+rust-version = "1.73"
+
+
+[workspace.dependencies]
+bytes = "1.5"
+url = "2.4"

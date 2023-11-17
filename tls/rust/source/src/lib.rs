@@ -1,5 +1,6 @@
 use regex::Regex;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
+use url::Url;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -146,9 +147,55 @@ pub enum HeaderShortener {
 
 impl HeaderShortener {
     fn shorten(&self, header_value: &str) -> String {
-        // TODO:
-        header_value.to_string()
+        match self {
+            Self::Accept => shortener_accept(header_value),
+            Self::AcceptLanguage => shortener_accept_language(header_value),
+            Self::Cookie(cookie_shortener) => {
+                shortener_cookie(cookie_shortener.allowed_cookie_names(), header_value)
+            }
+        }
     }
+}
+
+fn shortener_accept(_header_value: &str) -> String {
+    "*/*".to_string()
+}
+
+fn shortener_accept_language(header_value: &str) -> String {
+    let comma_idx = header_value.find(',');
+    let semicolon_idx = header_value.find(';');
+    if comma_idx.is_none() && semicolon_idx.is_none() {
+        return header_value.to_string();
+    }
+    if comma_idx.is_none() {
+        return header_value[..semicolon_idx.unwrap()].to_string();
+    }
+    if semicolon_idx.is_none() {
+        return header_value[..comma_idx.unwrap()].to_string();
+    }
+    if comma_idx.unwrap() < semicolon_idx.unwrap() {
+        return header_value[..comma_idx.unwrap()].to_string();
+    }
+    header_value[..semicolon_idx.unwrap()].to_string()
+}
+
+fn shortener_cookie(allowed_names: Vec<Regex>, header_value: &str) -> String {
+    let kvs = header_value.split(';');
+    let mut filtered_kvs: Vec<String> = Vec::new();
+    for kv in kvs {
+        let (cookie_name, cookie_value) = match kv.find('=') {
+            None => continue,
+            Some(i) => (kv[..i].trim(), kv[(i + 1)..].trim()),
+        };
+        let is_allowed = allowed_names
+            .iter()
+            .any(|regex| regex.is_match(cookie_name));
+        if !is_allowed {
+            continue;
+        }
+        filtered_kvs.push(format!("{}={}", cookie_name, cookie_value));
+    }
+    filtered_kvs.join("; ")
 }
 
 #[derive(Clone, Debug)]
@@ -158,8 +205,12 @@ pub enum CookieShortener {
 
 impl CookieShortener {
     fn allowed_cookie_names(&self) -> Vec<Regex> {
-        // TODO:
-        vec![]
+        match self {
+            Self::TwitterUserByScreenName => vec![
+                Regex::new(r"^auth_token$").unwrap(),
+                Regex::new(r"^ct0$").unwrap(),
+            ],
+        }
     }
 }
 
@@ -184,9 +235,25 @@ pub enum UrlShortener {
 
 impl UrlShortener {
     pub fn shorten(&self, url: &str) -> String {
-        // TODO:
-        url.to_string()
+        let mut parsed = match Url::parse(url) {
+            Ok(parsed) => parsed,
+            Err(_) => return url.to_string(),
+        };
+        let forbidden_query_keys: HashSet<String> = match self {
+            Self::TwitterUserByScreenName => HashSet::from(["fieldToggles".to_string()]),
+        };
+        filter_query(&mut parsed, &forbidden_query_keys);
+        parsed.to_string()
     }
+}
+
+fn filter_query(url: &mut Url, forbidden_keys: &HashSet<String>) {
+    let query: Vec<(String, String)> = url
+        .query_pairs()
+        .filter(|(name, _)| !forbidden_keys.contains(name.as_ref()))
+        .map(|(name, value)| (name.into_owned(), value.into_owned()))
+        .collect();
+    url.query_pairs_mut().clear().extend_pairs(&query);
 }
 
 #[derive(Clone, Debug, Default)]

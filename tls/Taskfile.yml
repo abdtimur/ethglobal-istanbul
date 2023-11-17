@@ -13,6 +13,6 @@ includes:
 
 tasks:
   ext-full:
-    deps:
-      - rust:ext-copy
-      - ext:build
+    cmds:
+      - task: rust:ext-copy
+      - task: ext:build

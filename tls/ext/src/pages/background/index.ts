@@ -1,4 +1,7 @@
 import { Header } from "@pages/msg/msg";
+import init, { is_supported_source_url } from "@pages/source";
+
+init();
 
 chrome.webRequest.onBeforeSendHeaders.addListener(
   requestHeadersListener,
@@ -45,14 +48,7 @@ function requestHeadersListener(
     return;
   }
 
-  // TODO: use some real is supported check later
-  const isSupportedSourceUrl = (url: string) => {
-    return (
-      url.includes("https://twitter.com/i/api/graphql/") &&
-      url.includes("UserByScreenName")
-    );
-  };
-  if (!isSupportedSourceUrl(details.url)) {
+  if (!is_supported_source_url(details.url)) {
     logd("abort: not a supported source URL");
     return;
   }

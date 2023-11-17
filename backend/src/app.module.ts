@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from './config/configuration';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CustomConfig } from './config/interfaces';
 import { DataSource } from 'typeorm';
+import { ZoomModule } from './zoom/zoom.module';
+import { MentorsModule } from './mentors/mentors.module';
+import { TimeslotsModule } from './timeslots/timeslots.module';
 
 const GlobalConfigModule = ConfigModule.forRoot({
   envFilePath:
@@ -33,7 +34,13 @@ const DatabaseModule = TypeOrmModule.forRootAsync({
 });
 
 @Module({
-  imports: [GlobalConfigModule, DatabaseModule],
+  imports: [
+    GlobalConfigModule,
+    DatabaseModule,
+    ZoomModule,
+    MentorsModule,
+    TimeslotsModule,
+  ],
   controllers: [],
   providers: [],
 })

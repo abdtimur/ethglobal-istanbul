@@ -30,4 +30,21 @@ export class ZoomService {
     };
   }
 
+  async getMeetingDuration(meetingId: string): Promise<number> {
+    const token = await getToken();
+    const response = await axios.get(`${ZOOM_API_BASE_URL}/past_meetings/${meetingId}`,{
+      headers: {
+        Authorization: `Bearer ${token.access_token}`,
+      },
+    });
+
+    const startTime = new Date(response.data.start_time).getTime();
+    const endTime = new Date(response.data.end_time).getTime();
+
+    const durationInMilliseconds = endTime - startTime;
+    const durationInMinutes = (durationInMilliseconds / (1000 * 60))
+
+    return durationInMinutes;
+  }
+
 }

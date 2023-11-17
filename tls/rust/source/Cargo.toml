@@ -1,0 +1,28 @@
+[package]
+edition.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+name = "hack_source"
+version = "0.1.0"
+
+
+[dependencies]
+bytes.workspace = true
+url.workspace = true
+
+regex = "1.10"
+wasm-bindgen = "0.2"
+
+
+# Further optimize the WASM binary generated after the Rust compiler has finished. `wasm-opt` can
+# often further decrease binary size or do clever tricks that haven't made their way into LLVM yet.
+[package.metadata.wasm-pack.profile.dev]
+wasm-opt = false
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = ["-O3"]
+
+
+[lib]
+crate-type = ["cdylib", "rlib"]

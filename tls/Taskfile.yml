@@ -1,0 +1,18 @@
+version: "3"
+
+set: [errexit, nounset, pipefail, xtrace]
+
+includes:
+  ext:
+    taskfile: ./ext/Taskfile.yml
+    dir: ./ext
+
+  rust:
+    taskfile: ./rust/Taskfile.yml
+    dir: ./rust
+
+tasks:
+  ext-full:
+    deps:
+      - rust:ext-copy
+      - ext:build

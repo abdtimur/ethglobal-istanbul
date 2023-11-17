@@ -1,4 +1,5 @@
 use regex::Regex;
+use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -13,8 +14,71 @@ pub struct SourceConfig {
 
 impl Default for SourceConfig {
     fn default() -> Self {
-        // TODO:
-        Self { sources: vec![] }
+        Self {
+            sources: vec![Source {
+                url_regex: Regex::new(
+                    r"^https://twitter\.com/i/api/graphql/.*/UserByScreenName.*$",
+                )
+                .unwrap(),
+                url_shortener: Some(UrlShortener::TwitterUserByScreenName),
+                allowed_headers: HashMap::from([
+                    (
+                        "accept".to_string(),
+                        AllowedHeader {
+                            shortener: Some(HeaderShortener::Accept),
+                        },
+                    ),
+                    (
+                        "accept-language".to_string(),
+                        AllowedHeader {
+                            shortener: Some(HeaderShortener::AcceptLanguage),
+                        },
+                    ),
+                    (
+                        "authorization".to_string(),
+                        AllowedHeader { shortener: None },
+                    ),
+                    (
+                        "cookie".to_string(),
+                        AllowedHeader {
+                            shortener: Some(HeaderShortener::Cookie(
+                                CookieShortener::TwitterUserByScreenName,
+                            )),
+                        },
+                    ),
+                    ("user-agent".to_string(), AllowedHeader { shortener: None }),
+                    (
+                        "x-csrf-token".to_string(),
+                        AllowedHeader { shortener: None },
+                    ),
+                ]),
+                reveal_req: RevealReq {
+                    headers: vec![
+                        "accept".to_string(),
+                        "accept-language".to_string(),
+                        "connection".to_string(),
+                        "host".to_string(),
+                        "user-agent".to_string(),
+                    ],
+                },
+                reveal_resp: RevealResp {
+                    headers: vec![
+                        "connection".to_string(),
+                        "date".to_string(),
+                        "last-modified".to_string(),
+                    ],
+                    body: RevealBody::Json {
+                        paths: vec![
+                            "data.user.result.id".to_string(),
+                            "data.user.result.legacy.created_at".to_string(),
+                            "data.user.result.legacy.default_profile".to_string(),
+                            "data.user.result.legacy.followers_count".to_string(),
+                            "data.user.result.rest_id".to_string(),
+                        ],
+                    },
+                },
+            }],
+        }
     }
 }
 
@@ -47,4 +111,86 @@ impl Source {
         // TODO:
         (url.to_string(), headers.to_vec())
     }
+}
+
+#[derive(Clone, Debug)]
+pub struct Header {
+    pub name: String,
+    pub value: String,
+}
+
+#[derive(Clone, Debug)]
+pub enum HeaderShortener {
+    Accept,
+    AcceptLanguage,
+    Cookie(CookieShortener),
+}
+
+impl HeaderShortener {
+    fn shorten(&self, header_value: &str) -> String {
+        // TODO:
+        header_value.to_string()
+    }
+}
+
+#[derive(Clone, Debug)]
+pub enum CookieShortener {
+    TwitterUserByScreenName,
+}
+
+impl CookieShortener {
+    fn allowed_cookie_names(&self) -> Vec<Regex> {
+        // TODO:
+        vec![]
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct AllowedHeader {
+    pub shortener: Option<HeaderShortener>,
+}
+
+impl AllowedHeader {
+    pub fn shorten(&self, header_value: &str) -> String {
+        match &self.shortener {
+            Some(shortener) => shortener.shorten(header_value),
+            None => header_value.to_string(),
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub enum UrlShortener {
+    TwitterUserByScreenName,
+}
+
+impl UrlShortener {
+    pub fn shorten(&self, url: &str) -> String {
+        // TODO:
+        url.to_string()
+    }
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct RevealReq {
+    pub headers: Vec<String>,
+    // TODO: only GET methods are supported for now so no redact for request body
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct RevealResp {
+    pub headers: Vec<String>,
+    pub body: RevealBody,
+}
+
+#[derive(Clone, Debug, Default)]
+pub enum RevealBody {
+    Html, // TODO: HTML is ignored for now, only JSON is supported
+
+    Json {
+        paths: Vec<String>,
+    },
+
+    #[default]
+    Unknown,
 }

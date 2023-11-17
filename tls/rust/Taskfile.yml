@@ -1,0 +1,25 @@
+version: "3"
+
+set: [errexit, nounset, pipefail, xtrace]
+
+includes:
+  source:
+    taskfile: ./source/Taskfile.yml
+    dir: ./source
+
+tasks:
+  check:
+    deps:
+      - source:check
+
+  build-dev:
+    deps:
+      - source:build-dev
+
+  build-release:
+    deps:
+      - source:build-release
+
+  ext-copy:
+    deps:
+      - source:copy-release

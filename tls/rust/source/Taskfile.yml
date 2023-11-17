@@ -1,0 +1,52 @@
+version: "3"
+
+set: [errexit, nounset, pipefail, xtrace]
+
+tasks:
+  check:
+    cmds:
+      - cargo check
+
+  build-dev:
+    deps: [check]
+    cmds:
+      - cargo build
+
+  build-release:
+    deps: [check]
+    cmds:
+      - cargo build --release
+
+  build-wasm-dev:
+    deps: [check]
+    cmds:
+      - |
+        wasm-pack build     \
+          --dev             \
+          --target web      \
+          --out-dir pkg/dev
+
+  build-wasm-release:
+    deps: [check]
+    cmds:
+      - |
+        wasm-pack build         \
+          --release             \
+          --target web          \
+          --out-dir pkg/release
+
+  copy-dev:
+    deps: [build-wasm-dev]
+    cmds:
+      - |
+        rm -rv ../../ext/src/pages/source || echo "nothing to remove"
+        cp -rv ./pkg/dev ../../ext/src/pages/source
+        rm -v ../../ext/src/pages/source/.gitignore
+
+  copy-release:
+    deps: [build-wasm-release]
+    cmds:
+      - |
+        rm -rv ../../ext/src/pages/source || echo "nothing to remove"
+        cp -rv ./pkg/release ../../ext/src/pages/source
+        rm -v ../../ext/src/pages/source/.gitignore

@@ -15,12 +15,9 @@ import { BookSlotRequest } from './requests/book-slot.request.dto';
 import { CompleteSlotRequest } from './requests/complete-slot.request.dto';
 import { Response } from 'express';
 
-
 @Controller('timeslots')
 export class TimeslotsController {
-  constructor(
-    private readonly timeslotsService: TimeslotsService
-  ) {}
+  constructor(private readonly timeslotsService: TimeslotsService) {}
 
   @Get('')
   async getTimeslots(@Query('mentor') mentor: string): Promise<TimeslotDto[]> {
@@ -83,11 +80,18 @@ export class TimeslotsController {
     } else if (zoomEvent.event === 'meeting.ended') {
       console.log('meeting.ended');
 
-      const duration = zoomEvent.payload.object.duration;
+      //calculate duration of meeting as endtime - starttime
+      const startTime = new Date(zoomEvent.payload.object.start_time).getTime();
+      const endTime = new Date(zoomEvent.payload.object.end_time).getTime();
+      const durationInMilliseconds = endTime - startTime;
+      const durationInMinutes = (durationInMilliseconds / (1000 * 60)).toFixed(
+        2,
+      );
+
       const meetingId = zoomEvent.payload.object.id;
       //todo: complete timeslot, example: duration 163184649 meetingId 86593241537
 
-      console.log('duration', duration, 'meetingId', meetingId);
+      console.log('duration', durationInMinutes, 'meetingId', meetingId);
 
       res.status(200);
     }

@@ -9,7 +9,6 @@ import {
 export class ZoomService {
   constructor() {}
 
-
   async createMeeting(
     createMeetingDto: CreateZoomMeetingRequestDto,
   ): Promise<CreateZoomMeetingResponseDto> {
@@ -22,5 +21,9 @@ export class ZoomService {
     };
   }
 
-  
+  async meetingEnded(zoomEvent: any): Promise<any> {
+    return {
+      response: 'ok',
+    };
+  }
 }

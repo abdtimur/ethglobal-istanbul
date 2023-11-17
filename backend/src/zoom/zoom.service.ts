@@ -24,8 +24,6 @@ export class ZoomService {
       },
     });
 
-    console.log(response);
-    
     return {
       id: response.data.id,
       join_url: response.data.start_url,

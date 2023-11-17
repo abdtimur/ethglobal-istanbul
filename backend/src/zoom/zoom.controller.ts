@@ -18,6 +18,8 @@ export class ZoomController {
     @Body() createMeetingDto: CreateZoomMeetingRequestDto,
   ): Promise<CreateZoomMeetingResponseDto> {
     console.log(createMeetingDto);
-    return this.zoom.createMeeting(createMeetingDto);
+    const response = await this.zoom.createMeeting(createMeetingDto);
+    console.log(response);
+    return response;
   }
 }

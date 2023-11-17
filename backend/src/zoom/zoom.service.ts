@@ -30,9 +30,8 @@ export class ZoomService {
     console.log(response);
     
     return {
-      id: 123,
-      join_url: 'https://zoom.us/j/123',
-      password: '123',
+      id: response.data.id,
+      join_url: response.data.start_url,
     };
   }
 

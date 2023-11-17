@@ -27,8 +27,6 @@ const getToken = async () => {
       },
     );
 
-    console.log(response);
-
     const { access_token, expires_in } = await response.data;
 
     return { access_token, expires_in, error: null };

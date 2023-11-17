@@ -17,11 +17,8 @@ export class ZoomService {
   async createMeeting(
     createMeetingDto: CreateZoomMeetingRequestDto,
   ): Promise<CreateZoomMeetingResponseDto> {
-    console.log(createMeetingDto);
-
     const token = await getToken();
-    console.log(token);
-    const response = await axios.post(`${ZOOM_API_BASE_URL}/users/${USER_ID}/meetings`, {},{
+    const response = await axios.post(`${ZOOM_API_BASE_URL}/users/${USER_ID}/meetings`, createMeetingDto,{
       headers: {
         Authorization: `Bearer ${token.access_token}`,
       },

@@ -37,6 +37,37 @@ pub async fn prover(input_json_str: &str) -> Result<String, JsValue> {
     Ok("{}".to_string())
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProverOpts {
+    pub env: ProverEnv,
+    pub input: ProverInput,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProverEnv {
+    pub max_transcript_size: usize, // NOTE: only 1 << 14 for now
+    pub proxy_address: String,
+    pub notary_address: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProverInput {
+    pub method: String, // NOTE: only GET for now
+    pub url: String,
+    pub headers: Vec<Header>,
+    pub body: Option<Vec<u8>>, // NOTE: only None for now
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Header {
+    pub name: String,
+    pub value: String,
+}
+
 /// Response object of the /session API
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

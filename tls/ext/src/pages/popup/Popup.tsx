@@ -41,6 +41,29 @@ export default class Popup extends React.Component<unknown, State> {
 
   generate() {
     console.log("Popup: generate");
+
+    const state = this.state;
+    if (!state.genMsg) {
+      console.log("Popup: generate: not genMsg, should never happen!");
+      return;
+    }
+
+    const input = {
+      method: "GET", // NOTE: only GET is supported for now
+      url: state.genMsg.url,
+      headers: state.genMsg.headers,
+    };
+    const env = {
+      maxTranscriptSize: 1 << 14,
+      proxyAddress: "ws://localhost:7000",
+      notaryAddress: "ws://localhost:7047/ws",
+      verifierAddress: "http://localhost:8080",
+    };
+    const opts = {
+      env: env,
+      input: input,
+    };
+
     this.setState((oldState: State) => {
       return {
         genMsg: oldState.genMsg,
@@ -60,7 +83,7 @@ export default class Popup extends React.Component<unknown, State> {
       // eslint-disable-next-line
       .then(async (prover: any) => {
         const tlsProofJsonStr: string = await prover.prover(
-          "{}" // TODO: use real input
+          JSON.stringify(opts)
         );
         console.log("prover: result: " + tlsProofJsonStr);
 
@@ -76,7 +99,7 @@ export default class Popup extends React.Component<unknown, State> {
           };
         });
 
-        // TODO: send request to verifier
+        // TODO: send request to verifier, env.verifierAddress
       })
       .catch((err: Error) => {
         console.log("prover: error: " + err);
@@ -94,6 +117,7 @@ export default class Popup extends React.Component<unknown, State> {
         });
 
         // TODO: hardcoded successful proof for the sake of hackathon!
+        // TODO: send request to verifier, env.verifierAddress
       });
   }
 

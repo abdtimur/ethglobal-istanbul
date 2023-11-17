@@ -1,6 +1,11 @@
+use async_io_stream::IoStream;
+use eyre::eyre;
+use futures_util::AsyncWriteExt;
 use serde::{Deserialize, Serialize};
+use tlsn_core::proof::TlsProof;
 use wasm_bindgen::prelude::*;
 use web_time::Instant;
+use ws_stream_wasm::{WsMeta, WsStreamIo};
 
 // https://github.com/GoogleChromeLabs/wasm-bindgen-rayon#setting-up
 pub use wasm_bindgen_rayon::init_thread_pool;
@@ -30,11 +35,61 @@ pub async fn prover(input_json_str: &str) -> Result<String, JsValue> {
 
     let start_time = Instant::now();
 
-    // TODO:
+    let opts: ProverOpts = serde_json::from_str(input_json_str)
+        .map_err(|e| JsValue::from_str(&format!("failed to parse input JSON: {e}")[..]))?;
+    log!("parse input JSON OK: {opts:?}");
 
+    let proof_res = prover_internal(opts).await;
     log!("elapsed: {}s", start_time.elapsed().as_secs());
 
-    Ok("{}".to_string())
+    let proof = proof_res.map_err(|e| JsValue::from_str(&format!("prover failed: {e}")[..]))?;
+    log!("obtain proof OK");
+
+    let proof_json_str = serde_json::to_string(&proof).map_err(|e| {
+        JsValue::from_str(&format!("failed to serialize final proof content: {e}")[..])
+    })?;
+    log!("serialize final proof content OK");
+
+    Ok(proof_json_str)
+}
+
+async fn prover_internal(opts: ProverOpts) -> eyre::Result<TlsProof> {
+    let proxy_io_stream = connect_to_proxy(&opts.env.proxy_address, &opts.input.url)
+        .await
+        .map_err(|e| eyre!("connect to proxy failed: {e}"))?;
+
+    log!("connect to proxy OK");
+
+    // TODO:
+    Err(eyre::eyre!("not implemented"))
+}
+
+async fn connect_to_proxy(
+    proxy_address: &str,
+    target_url: &str,
+) -> eyre::Result<IoStream<WsStreamIo, Vec<u8>>> {
+    let (_, proxy_ws_stream) = WsMeta::connect(proxy_address, None)
+        .await
+        .map_err(|e| eyre!("failed to connect to proxy: {e}"))?;
+
+    log!("connect to proxy OK");
+
+    let mut proxy_io_stream = proxy_ws_stream.into_io();
+
+    // Set the target for proxying
+    let url_json_bytes = serde_json::to_vec(target_url)
+        .map_err(|e| eyre!("failed to serialize proxy target: {e}"))?;
+
+    log!("serialize proxy target OK");
+
+    proxy_io_stream
+        .write_all(&url_json_bytes)
+        .await
+        .map_err(|e| eyre!("failed to set proxy target: {e}"))?;
+
+    log!("set proxy target OK");
+
+    Ok(proxy_io_stream)
 }
 
 #[derive(Debug, Serialize, Deserialize)]

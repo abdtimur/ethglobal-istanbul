@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Res } from '@nestjs/common';
+import { Controller, Post, Body, Res, Get, Query } from '@nestjs/common';
 import { ZoomService } from './zoom.service';
 import { Response } from 'express';
 
@@ -18,6 +18,17 @@ export class ZoomController {
     @Body() createMeetingDto: CreateZoomMeetingRequestDto,
   ): Promise<CreateZoomMeetingResponseDto> {
     console.log(createMeetingDto);
-    return this.zoom.createMeeting(createMeetingDto);
+    const response = await this.zoom.createMeeting(createMeetingDto);
+    console.log(response);
+    return response;
   }
+
+  @Get('/meeting-duration')
+  async getMeetingDuration(
+    @Query('meetingId') meetingId: string,
+  ): Promise<number> {
+    const duration = await this.zoom.getMeetingDuration(meetingId);
+    return duration;
+  }
+
 }

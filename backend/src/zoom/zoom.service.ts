@@ -17,23 +17,34 @@ export class ZoomService {
   async createMeeting(
     createMeetingDto: CreateZoomMeetingRequestDto,
   ): Promise<CreateZoomMeetingResponseDto> {
-    console.log(createMeetingDto);
-
     const token = await getToken();
-    console.log(token);
-    const response = await axios.post(`${ZOOM_API_BASE_URL}/users/${USER_ID}/meetings`, {},{
+    const response = await axios.post(`${ZOOM_API_BASE_URL}/users/${USER_ID}/meetings`, createMeetingDto,{
       headers: {
         Authorization: `Bearer ${token.access_token}`,
       },
     });
 
-    console.log(response);
-    
     return {
-      id: 123,
-      join_url: 'https://zoom.us/j/123',
-      password: '123',
+      id: response.data.id,
+      join_url: response.data.start_url,
     };
+  }
+
+  async getMeetingDuration(meetingId: string): Promise<number> {
+    const token = await getToken();
+    const response = await axios.get(`${ZOOM_API_BASE_URL}/past_meetings/${meetingId}`,{
+      headers: {
+        Authorization: `Bearer ${token.access_token}`,
+      },
+    });
+
+    const startTime = new Date(response.data.start_time).getTime();
+    const endTime = new Date(response.data.end_time).getTime();
+
+    const durationInMilliseconds = endTime - startTime;
+    const durationInMinutes = (durationInMilliseconds / (1000 * 60))
+
+    return durationInMinutes;
   }
 
 }

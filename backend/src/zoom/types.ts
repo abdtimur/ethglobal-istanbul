@@ -3,14 +3,13 @@ import { type } from 'os';
 export interface CreateZoomMeetingRequestDto {
   topic: string;
   type: 2;
-  start_time: string;
+  start_time: Date;
   duration: 60;
   timezone: 'UTC';
 }
 export interface CreateZoomMeetingResponseDto {
   id: number;
   join_url: string;
-  password: string;
 }
 
 export interface ZoomMeetingEndedEvent {

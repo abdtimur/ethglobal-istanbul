@@ -1,0 +1,109 @@
+[package]
+edition = "2021"
+repository = "https://github.com/abdtimur/ethglobal-istanbul"
+rust-version = "1.73"
+
+name = "hack_client"
+version = "0.1.0"
+
+
+[lib]
+crate-type = ["cdylib"]
+
+
+[features]
+console_error_panic_hook = ["dep:console_error_panic_hook"]
+
+
+[dependencies]
+hack_source = { path = "../source" }
+
+async_io_stream = "0.3"
+console_error_panic_hook = { version = "0.1", optional = true }
+eyre = "0.6"
+futures = "0.3"
+futures-util = "0.3"
+getrandom = { version = "0.2", features = ["js"] }
+hyper = { version = "0.14", features = ["client", "http1"] }
+rayon = "1.8"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde-wasm-bindgen = "0.6"
+tokio-util = "0.7"
+url = "2.4"
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+wasm-bindgen-rayon = "1.0"
+web-time = "0.2"
+ws_stream_wasm = "0.7"
+
+[dependencies.tlsn-core]
+git = "https://github.com/rozag/tlsn.git"
+package = "tlsn-core"
+rev = "2cc1e19"
+
+[dependencies.tlsn-formats]
+git = "https://github.com/rozag/tlsn.git"
+package = "tlsn-formats"
+rev = "2cc1e19"
+
+[dependencies.tlsn-prover]
+git = "https://github.com/rozag/tlsn.git"
+package = "tlsn-prover"
+rev = "2cc1e19"
+
+[dependencies.tlsn-tls-client]
+git = "https://github.com/rozag/tlsn.git"
+package = "tlsn-tls-client"
+rev = "2cc1e19"
+
+[dependencies.web-sys]
+version = "0.3"
+features = [
+  "BinaryType",
+  "Blob",
+  "ErrorEvent",
+  "FileReader",
+  "MessageEvent",
+  "ProgressEvent",
+  "WebSocket",
+  "console",
+  "Document",
+  "HtmlElement",
+  "HtmlInputElement",
+  "Window",
+  "Worker",
+]
+
+# Replace ring with the forked version `ring-xous` implemented in pure rust
+# to make it compiled to wasm.
+# Refs:
+# - Rationale for `ring-xous`: https://www.bunniestudios.com/blog/?p=6521
+# - Issue for wasm comptability: https://github.com/briansmith/ring/issues/918
+[patch.crates-io.ring]
+git = "https://github.com/betrusted-io/ring-xous"
+branch = "0.16.20-cleanup"
+
+# Use the patched ws_stream_wasm to fix the issue
+# https://github.com/najamelan/ws_stream_wasm/issues/12#issuecomment-1711902958
+[patch.crates-io.ws_stream_wasm]
+git = "https://github.com/mhchia/ws_stream_wasm"
+branch = "dev"
+
+
+# Perform some optimizations for debug builds because of `failed to execute wasm-bindgen` and
+# `locals exceed maximum (at offset 10804636)` error.
+[profile.dev]
+opt-level = 1
+
+[profile.release]
+opt-level = 3
+
+
+# Further optimize the WASM binary generated after the Rust compiler has finished. `wasm-opt` can
+# often further decrease binary size or do clever tricks that haven't made their way into LLVM yet.
+[package.metadata.wasm-pack.profile.dev]
+wasm-opt = false
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = ["-O3"]

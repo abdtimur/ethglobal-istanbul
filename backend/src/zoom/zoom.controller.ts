@@ -26,9 +26,8 @@ export class ZoomController {
   @Get('/meeting-duration')
   async getMeetingDuration(
     @Query('meetingId') meetingId: string,
-  ): Promise<number> {
+  ): Promise<any> {
     const duration = await this.zoom.getMeetingDuration(meetingId);
-    return duration;
+    return { duration: duration, id: meetingId };
   }
-
 }

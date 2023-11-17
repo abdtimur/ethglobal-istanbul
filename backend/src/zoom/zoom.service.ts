@@ -30,7 +30,7 @@ export class ZoomService {
     };
   }
 
-  async getMeetingDuration(meetingId: string): Promise<number> {
+  async getMeetingDuration(meetingId: string): Promise<string> {
     const token = await getToken();
     const response = await axios.get(`${ZOOM_API_BASE_URL}/past_meetings/${meetingId}`,{
       headers: {
@@ -42,7 +42,7 @@ export class ZoomService {
     const endTime = new Date(response.data.end_time).getTime();
 
     const durationInMilliseconds = endTime - startTime;
-    const durationInMinutes = (durationInMilliseconds / (1000 * 60))
+    const durationInMinutes = (durationInMilliseconds / (1000 * 60)).toFixed(2);
 
     return durationInMinutes;
   }

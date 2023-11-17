@@ -94,6 +94,9 @@ export class TimeslotsController {
       console.log('duration', durationInMinutes, 'meetingId', meetingId);
 
       res.status(200);
+    }else if (zoomEvent.event === 'meeting.started') {
+      console.log('meeting.started');
+      res.status(200);
     }
   }
 }

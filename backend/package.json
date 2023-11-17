@@ -13,6 +13,8 @@
     "start:devtim": "NODE_ENV=develop nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
+    "typeorm": "ts-node ./node_modules/typeorm/cli",
+    "typeorm:migration:generate": "NODE_ENV=develop npm run typeorm -- -d ./src/typeorm.config.ts migration:generate ./src/migrations/initial",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -29,7 +31,8 @@
     "pg": "^8.11.3",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
-    "typeorm": "^0.3.12"
+    "typeorm": "^0.3.12",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",

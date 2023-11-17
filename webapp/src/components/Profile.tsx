@@ -79,12 +79,19 @@ const Profile: React.FC = () => {
           </div>
           <div className="flex flex-col mt-8">
             <h3 className="font-bold text-md">Proofs</h3>
-            <a
-              href="https://twitter.com/"
-              className="btn btn-secondary max-w-xs mt-4"
-            >
-              Verify Twitter followers
-            </a>
+            {profile.tlsnVerified ? (
+              <p className="text-success mt-4">
+                🎉 Twitter followers verified 🎉
+              </p>
+            ) : (
+              <a
+                href="https://twitter.com/"
+                className="btn btn-secondary max-w-xs mt-4"
+              >
+                Verify Twitter followers
+              </a>
+            )}
+
             <button className="btn btn-secondary max-w-xs mt-4">
               WorldID!
             </button>

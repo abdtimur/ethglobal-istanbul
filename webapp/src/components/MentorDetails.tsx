@@ -25,7 +25,6 @@ const MentorDetails: React.FC = () => {
       );
       const responseJson = await response.json();
       setDetails(responseJson);
-      console.log(responseJson);
     };
 
     getDetails();

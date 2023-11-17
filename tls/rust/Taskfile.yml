@@ -3,6 +3,9 @@ version: "3"
 set: [errexit, nounset, pipefail, xtrace]
 
 includes:
+  proxy:
+    taskfile: ./proxy/Taskfile.yml
+    dir: ./proxy
   source:
     taskfile: ./source/Taskfile.yml
     dir: ./source
@@ -10,14 +13,17 @@ includes:
 tasks:
   check:
     deps:
+      - proxy:check
       - source:check
 
   build-dev:
     deps:
+      - proxy:build-dev
       - source:build-dev
 
   build-release:
     deps:
+      - proxy:build-release
       - source:build-release
 
   ext-copy:

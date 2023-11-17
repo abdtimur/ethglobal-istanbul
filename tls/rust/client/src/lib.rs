@@ -2,12 +2,14 @@ use async_io_stream::IoStream;
 use eyre::eyre;
 use futures::channel::oneshot;
 use futures_util::{AsyncWriteExt, SinkExt, StreamExt};
+use hack_source::{Source, SourceConfig};
+use hyper::{Body, Request};
 use serde::{Deserialize, Serialize};
 use tlsn_core::proof::TlsProof;
 use tlsn_prover::tls::{Prover, ProverConfig};
 use tlsn_tls_client::RootCertStore;
 use tokio_util::compat::FuturesAsyncReadCompatExt;
-use url::Url;
+use url::{Position, Url};
 use wasm_bindgen::prelude::*;
 use web_time::Instant;
 use ws_stream_wasm::{WsMessage, WsMeta, WsStreamIo};
@@ -156,8 +158,86 @@ async fn prover_internal(opts: ProverOpts) -> eyre::Result<TlsProof> {
 
     log!("starting an MPC TLS connection with the server");
 
+    let source_config = SourceConfig::default();
+    let (source, request) = build_request(&source_config, &opts.input)
+        .map_err(|e| eyre!("failed to build request: {e}"))?;
+
+    log!("build request OK");
+
     // TODO:
     Err(eyre::eyre!("not implemented"))
+}
+
+fn build_request<'a>(
+    source_config: &'a SourceConfig,
+    input: &ProverInput,
+) -> eyre::Result<(&'a Source, Request<Body>)> {
+    // TODO: we'll need to support other methods later
+    let method = input.method.to_uppercase();
+    if "GET" != method {
+        return Err(eyre!(
+            "only GET requests are supported at the moment, got {method}"
+        ));
+    }
+
+    let source = match source_config.find_source(&input.url) {
+        None => return Err(eyre!("URL not supported")),
+        Some(source) => source,
+    };
+
+    log!("build_request: before: url: {}", input.url);
+    for (idx, header) in input.headers.iter().enumerate() {
+        log!("build_request: before: header[{idx}]: {header:?}");
+    }
+
+    let headers = input
+        .headers
+        .iter()
+        .map(|header| hack_source::Header {
+            name: header.name.clone(),
+            value: header.value.clone(),
+        })
+        .collect::<Vec<hack_source::Header>>();
+    let (shortened_url, shortened_headers) = source.minify_request(&input.url, &headers);
+
+    log!("build_request: after: url: {}", shortened_url);
+    for (idx, header) in shortened_headers.iter().enumerate() {
+        log!("build_request: after: header[{idx}]: {header:?}");
+    }
+
+    let url = Url::parse(&shortened_url)
+        .map_err(|e| eyre!("failed to parse shortened URL ({shortened_url}): {e}"))?;
+
+    let target_host = url
+        .host_str()
+        .ok_or_else(|| eyre!("shortened URL has no host: {url}"))?;
+
+    let mut request_builder = Request::builder()
+        .method(&method[..])
+        .uri(&url[Position::BeforePath..]);
+
+    for header in shortened_headers.iter() {
+        request_builder = request_builder.header(&header.name[..], &header.value[..]);
+    }
+    request_builder = request_builder
+        .header("Host", target_host)
+        .header("Connection", "close");
+
+    let body = match &input.body {
+        None => {
+            log!("request body is empty");
+            Body::empty()
+        }
+        Some(body_bytes) => {
+            log!("request body is not empty: {} bytes", body_bytes.len());
+            Body::from(body_bytes.clone())
+        }
+    };
+    let request = request_builder
+        .body(body)
+        .map_err(|e| eyre!("failed to build request: {e}"))?;
+
+    Ok((source, request))
 }
 
 async fn connect_to_notary(

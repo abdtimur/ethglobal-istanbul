@@ -6,6 +6,11 @@
 */
 export function prover(input_json_str: string): Promise<string>;
 /**
+* @param {string} url
+* @returns {boolean}
+*/
+export function is_supported_source_url(url: string): boolean;
+/**
 * @param {number} num_threads
 * @returns {Promise<any>}
 */
@@ -103,6 +108,7 @@ export interface InitOutput {
   readonly nistz384_point_double: (a: number, b: number) => void;
   readonly __assert_fail: (a: number, b: number, c: number, d: number) => void;
   readonly p256_scalar_sqr_rep_mont: (a: number, b: number, c: number) => void;
+  readonly is_supported_source_url: (a: number, b: number) => number;
   readonly memory: WebAssembly.Memory;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;

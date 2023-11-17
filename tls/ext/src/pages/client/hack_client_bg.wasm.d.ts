@@ -69,6 +69,7 @@ export function p384_elem_neg(a: number, b: number): void;
 export function nistz384_point_double(a: number, b: number): void;
 export function __assert_fail(a: number, b: number, c: number, d: number): void;
 export function p256_scalar_sqr_rep_mont(a: number, b: number, c: number): void;
+export function is_supported_source_url(a: number, b: number): number;
 export const memory: WebAssembly.Memory;
 export function __wbindgen_malloc(a: number, b: number): number;
 export function __wbindgen_realloc(a: number, b: number, c: number, d: number): number;

@@ -1,11 +1,13 @@
+use hack_source::{Source, SourceConfig};
+
 use async_io_stream::IoStream;
 use eyre::eyre;
-use futures::channel::oneshot;
+use futures::channel::oneshot::{self, Receiver};
 use futures_util::{AsyncWriteExt, SinkExt, StreamExt};
-use hack_source::{Source, SourceConfig};
-use hyper::{Body, Request};
+use hyper::{body, Body, Request, StatusCode};
 use serde::{Deserialize, Serialize};
 use tlsn_core::proof::TlsProof;
+use tlsn_prover::tls::state::Closed;
 use tlsn_prover::tls::{Prover, ProverConfig};
 use tlsn_tls_client::RootCertStore;
 use tokio_util::compat::FuturesAsyncReadCompatExt;
@@ -164,8 +166,52 @@ async fn prover_internal(opts: ProverOpts) -> eyre::Result<TlsProof> {
 
     log!("build request OK");
 
+    // Send the request to the Server and get a response via the MPC TLS connection
+    let response = request_sender
+        .send_request(request)
+        .await
+        .map_err(|e| eyre!("failed to send request to server: {e}"))?;
+
+    log!("send request to server OK");
+
+    let resp_status = response.status();
+    if resp_status != StatusCode::OK {
+        return Err(eyre!("server returned non-OK status: {resp_status}"));
+    }
+
+    log!("response status code OK");
+
+    // Get response
+    body::to_bytes(response.into_body())
+        .await
+        .map_err(|e| eyre!("failed to get response body: {e}"))?;
+
+    log!("get response body OK");
+
+    // Close the connection to the server
+    let mut client_socket = conn_receiver
+        .await
+        .map_err(|e| eyre!("failed to get client socket: {e}"))?
+        .io
+        .into_inner();
+
+    log!("get connection receiver for closure OK");
+
+    if let Err(e) = client_socket.close().await {
+        return Err(eyre!("failed to close client socket: {e}"));
+    }
+
+    log!("close client socket OK");
+
+    notarize_session(prover_receiver, source).await
+}
+
+async fn notarize_session(
+    prover_receiver: Receiver<Prover<Closed>>,
+    source: &Source,
+) -> eyre::Result<TlsProof> {
     // TODO:
-    Err(eyre::eyre!("not implemented"))
+    Err(eyre!("notarize_session not implemented"))
 }
 
 fn build_request<'a>(

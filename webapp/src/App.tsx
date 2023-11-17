@@ -3,8 +3,32 @@ import { Header } from "./components/Header";
 import { CardsList } from "./components/CardsList";
 import { MentorDetails } from "./components/MentorDetails";
 import { Profile } from "./components/Profile";
+import { useAccount } from "wagmi";
+import { useEffect } from "react";
 
 function App() {
+  const { address } = useAccount();
+
+  useEffect(() => {
+    if (address) {
+      const createProfile = async () => {
+        try {
+          await fetch("https://ethg-ist.fly.dev/api/mentors/create", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ account: address }),
+          });
+        } catch (e) {
+          console.log(e);
+        }
+      };
+
+      createProfile();
+    }
+  }, [address]);
+
   return (
     <>
       <Header />
@@ -33,7 +57,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Profile />} />
             <Route path="/mentors" element={<CardsList />}>
-              <Route path=":id" element={<MentorDetails />} />
+              <Route path=":mentorId" element={<MentorDetails />} />
             </Route>
           </Routes>
         </div>

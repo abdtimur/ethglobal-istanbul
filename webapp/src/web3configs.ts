@@ -1,0 +1,138 @@
+import {
+  connectorsForWallets,
+} from '@rainbow-me/rainbowkit';
+import { braveWallet, coinbaseWallet, metaMaskWallet, rainbowWallet, safeWallet, walletConnectWallet } from '@rainbow-me/rainbowkit/wallets';
+import { CHAIN_NAMESPACES, LoginMethodConfig, WALLET_ADAPTERS } from '@web3auth/base';
+import { Web3Auth } from '@web3auth/modal';
+// import { OpenloginAdapter } from '@web3auth/openlogin-adapter';
+import { Web3AuthConnector } from '@web3auth/web3auth-wagmi-connector';
+import { Chain, configureChains, createConfig } from 'wagmi';
+import {
+  mainnet,
+  polygon,
+  optimism,
+  arbitrum,
+  base,
+  zora,
+} from 'wagmi/chains';
+import LOGO from './assets/google.png';
+
+import { publicProvider } from 'wagmi/providers/public';
+
+const NAME = 'BOILERPLATE';
+
+const { chains, publicClient } = configureChains(
+  [mainnet, polygon, optimism, arbitrum, base, zora],
+  [
+    publicProvider()
+  ]
+); 
+
+function newWeb3AuthInstance({
+  chains,
+  loginMethodsOrder,
+}: {
+  chains: Chain[];
+  loginMethodsOrder: string[];
+}) {
+  const auth = new Web3Auth({
+    clientId: 'WEB3ATUH_CLIENT_ID',
+    web3AuthNetwork: 'cyan',
+    chainConfig: {
+      chainNamespace: CHAIN_NAMESPACES.EIP155,
+      chainId: `0x${chains[0].id.toString(16)}`,
+      displayName: chains[0].name,
+      tickerName: chains[0].nativeCurrency.name,
+      ticker: chains[0].nativeCurrency.symbol,
+      blockExplorer: chains[0].blockExplorers?.default.url,
+    },
+    uiConfig: {
+      loginMethodsOrder,
+      defaultLanguage: 'en',
+      modalZIndex: '2147483647',
+      appName: NAME,
+    },
+  });
+  // const openLoginAdapter = new OpenloginAdapter({
+  //   adapterSettings: {
+  //     uxMode: 'redirect',
+  //   },
+  // });
+  // auth.configureAdapter(openLoginAdapter);
+  return auth;
+}
+
+const defaultModalConfig = {
+  [WALLET_ADAPTERS.WALLET_CONNECT_V2]: {
+    label: 'WalletConnect v2',
+    showOnModal: false,
+  },
+  [WALLET_ADAPTERS.TORUS_EVM]: {
+    label: 'Torus',
+    showOnModal: false,
+  },
+  [WALLET_ADAPTERS.METAMASK]: {
+    label: 'Metamask',
+    showOnModal: false,
+  },
+  [WALLET_ADAPTERS.COINBASE]: {
+    label: 'Coinbase',
+    showOnModal: false,
+  },
+};
+
+const WEB3AUTH_LOGIN_METHODS = ['google', 'apple', 'email_passwordless'];
+
+const web3AuthWallet = {
+  id: 'web3auth-email-or-phone',
+  name: 'Email',
+  iconUrl: LOGO,
+  iconBackground: '#fff',
+  createConnector: () => ({
+    connector: new Web3AuthConnector({
+      chains,
+      options: {
+        web3AuthInstance: newWeb3AuthInstance({ chains, loginMethodsOrder: WEB3AUTH_LOGIN_METHODS }),
+        modalConfig: {
+          ...defaultModalConfig,
+          [WALLET_ADAPTERS.OPENLOGIN]: {
+            label: 'Social',
+            loginMethods: WEB3AUTH_LOGIN_METHODS.reduce((acc: LoginMethodConfig, method) => {
+              acc[method] = {
+              name: method.toUpperCase(),
+              mainOption: true,
+              showOnModal: true,
+            }
+            return acc
+          },{}),
+          },
+        },
+      },
+    }),
+  }),
+}
+
+const connectors = connectorsForWallets([
+  {groupName: 'web3Auth',
+wallets: [web3AuthWallet],
+}, {
+  groupName: 'Connect Wallet',
+  wallets: [
+    braveWallet({ chains }),
+    metaMaskWallet({ chains, projectId: 'WC_PROJECT_ID' }),
+    coinbaseWallet({ appName: 'Wingman', chains }),
+    walletConnectWallet({ chains, projectId: 'WC_PROJECT_ID' }),
+    rainbowWallet({ chains, projectId: 'WC_PROJECT_ID' }),
+    safeWallet({ chains }),
+  ],
+}
+])
+
+
+const wagmiConfig = createConfig({
+  autoConnect: true,
+  connectors,
+  publicClient
+})
+
+export {wagmiConfig, chains}

@@ -72,7 +72,8 @@ impl Default for SourceConfig {
                         paths: vec![
                             "data.user.result.id".to_string(),
                             "data.user.result.legacy.created_at".to_string(),
-                            "data.user.result.legacy.default_profile".to_string(),
+                            // TODO: bools aren't supported yet??
+                            // "data.user.result.legacy.default_profile".to_string(),
                             "data.user.result.legacy.followers_count".to_string(),
                             "data.user.result.rest_id".to_string(),
                         ],

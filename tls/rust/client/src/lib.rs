@@ -1,4 +1,4 @@
-use hack_source::{Source, SourceConfig};
+use hack_source::{RevealBody, Source, SourceConfig};
 
 use async_io_stream::IoStream;
 use eyre::eyre;
@@ -6,9 +6,9 @@ use futures::channel::oneshot::{self, Receiver};
 use futures_util::{AsyncWriteExt, SinkExt, StreamExt};
 use hyper::{body, Body, Request, StatusCode};
 use serde::{Deserialize, Serialize};
-use tlsn_core::proof::TlsProof;
-use tlsn_prover::tls::state::Closed;
-use tlsn_prover::tls::{Prover, ProverConfig};
+use tlsn_core::proof::{SubstringsProof, TlsProof};
+use tlsn_formats::http::{BodyProofBuilder, HttpProofBuilder, NotarizedHttpSession};
+use tlsn_prover::tls::{state::Closed, Prover, ProverConfig};
 use tlsn_tls_client::RootCertStore;
 use tokio_util::compat::FuturesAsyncReadCompatExt;
 use url::{Position, Url};
@@ -28,6 +28,9 @@ macro_rules! log {
 }
 
 const CA_CERTS: &str = include_str!("../ca-certificates.crt");
+
+const DEBUG_REDACTED_TRANSCRIPTS: bool = false;
+const LOG_TRANSCRIPTS: bool = true;
 
 #[wasm_bindgen]
 pub async fn prover(input_json_str: &str) -> Result<String, JsValue> {
@@ -210,8 +213,141 @@ async fn notarize_session(
     prover_receiver: Receiver<Prover<Closed>>,
     source: &Source,
 ) -> eyre::Result<TlsProof> {
-    // TODO:
-    Err(eyre!("notarize_session not implemented"))
+    // The Prover task should be done now, so we can grab it.
+    let prover = prover_receiver
+        .await
+        .map_err(|e| eyre!("failed to get prover: {e}"))?;
+
+    if LOG_TRANSCRIPTS {
+        log!(
+            "sent transcript:\n{}",
+            String::from_utf8(prover.sent_transcript().data().to_vec())
+                .map_err(|e| eyre!("failed to convert sent transcript to string: {e}"))?
+        );
+        log!(
+            "recv transcript:\n{}",
+            String::from_utf8(prover.recv_transcript().data().to_vec())
+                .map_err(|e| eyre!("failed to convert recv transcript to string: {e}"))?
+        );
+    }
+
+    let http_prover = prover
+        .to_http()
+        .map_err(|e| eyre!("failed to convert prover to HTTP prover: {e}"))?;
+    let mut http_prover = http_prover.start_notarize();
+
+    http_prover
+        .commit()
+        .map_err(|e| eyre!("HttpProver.commit() failed: {e}"))?;
+
+    let notarized_http_session: NotarizedHttpSession = http_prover
+        .finalize()
+        .await
+        .map_err(|e| eyre!("failed to finalize: {e}"))?;
+
+    let mut http_proof_builder: HttpProofBuilder = notarized_http_session.proof_builder();
+
+    let Some(mut req_proof_builder) = http_proof_builder.request(0) else {
+        return Err(eyre!("failed to get request proof builder"));
+    };
+
+    // NOTE: ignoring request body reveal for now because only GET requests are supported
+
+    req_proof_builder
+        .path()
+        .map_err(|e| eyre!("failed to reveal request path: {e}"))?;
+    for reveal_header in source.reveal_req.headers.iter() {
+        req_proof_builder
+            .header(reveal_header)
+            .map_err(|e| eyre!("failed to reveal request header '{reveal_header}': {e}"))?;
+    }
+
+    let Some(mut resp_proof_builder) = http_proof_builder.response(0) else {
+        return Err(eyre!("failed to get response proof builder"));
+    };
+
+    for reveal_header in source.reveal_resp.headers.iter() {
+        resp_proof_builder
+            .header(reveal_header)
+            .map_err(|e| eyre!("failed to reveal response header '{reveal_header}': {e}"))?;
+    }
+
+    let Some(mut resp_body_proof_builder) = resp_proof_builder.body() else {
+        return Err(eyre!("failed to get response body proof builder"));
+    };
+
+    match &source.reveal_resp.body {
+        RevealBody::Html => return Err(eyre!("HTML response body reveal is not supported yet")),
+
+        RevealBody::Json { paths } => {
+            let BodyProofBuilder::Json(ref mut builder) = resp_body_proof_builder else {
+                return Err(eyre!(
+                    "expected BodyProofBuilder::Json response body type, got {:?}",
+                    resp_body_proof_builder
+                ));
+            };
+            for path in paths.iter() {
+                builder
+                    .path(path)
+                    .map_err(|e| eyre!("failed to reveal response body path '{path}': {e}"))?;
+            }
+        }
+
+        RevealBody::Unknown => {
+            let BodyProofBuilder::Unknown(ref mut builder) = resp_body_proof_builder else {
+                return Err(eyre!(
+                    "expected BodyProofBuilder::Unknown response body type, got {:?}",
+                    resp_body_proof_builder
+                ));
+            };
+            builder
+                .all()
+                .map_err(|e| eyre!("failed to reveal response body: {e}"))?;
+        }
+    };
+
+    resp_body_proof_builder
+        .build()
+        .map_err(|e| eyre!("failed to build response body proof: {e}"))?;
+
+    let substrings_proof: SubstringsProof = http_proof_builder
+        .build()
+        .map_err(|e| eyre!("failed to build HTTP proof: {e}"))?;
+
+    build_final_proof(notarized_http_session, substrings_proof)
+}
+
+fn build_final_proof(
+    notarized_http_session: NotarizedHttpSession,
+    substrings_proof: SubstringsProof,
+) -> eyre::Result<TlsProof> {
+    if !DEBUG_REDACTED_TRANSCRIPTS {
+        let proof = TlsProof {
+            session: notarized_http_session.session_proof(),
+            substrings: substrings_proof,
+        };
+        return Ok(proof);
+    }
+
+    let (mut sent_redacted_transcript, mut recv_redacted_transcript) = substrings_proof
+        .verify(notarized_http_session.session().header())
+        .map_err(|e| eyre!("failed to verify HTTP proof: {e}"))?;
+    sent_redacted_transcript.set_redacted(b'1');
+    recv_redacted_transcript.set_redacted(b'1');
+    log!(
+        "sent redacted transcript:\n{}",
+        String::from_utf8(sent_redacted_transcript.data().to_vec())
+            .map_err(|e| eyre!("failed to convert sent redacted transcript to string: {e}"))?
+    );
+    log!(
+        "recv redacted transcript:\n{}",
+        String::from_utf8(recv_redacted_transcript.data().to_vec())
+            .map_err(|e| eyre!("failed to convert received redacted transcript to string: {e}"))?
+    );
+
+    Err(eyre!(
+        "not a real error, just testing redacted transcripts output"
+    ))?
 }
 
 fn build_request<'a>(

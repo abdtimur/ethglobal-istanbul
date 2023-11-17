@@ -1,9 +1,9 @@
+import { Mentor } from '../mentors/mentor.entity';
 import migrations from '../migrations';
+import { Timeslot } from '../timeslots/timeslot.entity';
 import { Env } from './interfaces';
 
-const entities: never[] = [
-  // TODO: add entities here
-];
+const entities = [Mentor, Timeslot];
 
 const configuration = () => ({
   dbConfig: {
@@ -13,7 +13,7 @@ const configuration = () => ({
     url: process.env[Env.DATABASE_URL],
     // useUTC: true,
     synchronize: false,
-    logging: ['error', 'warn', 'info'],
+    logging: 'all',
   },
 });
 

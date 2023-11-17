@@ -1,0 +1,32 @@
+version: "3"
+
+set: [errexit, nounset, pipefail, xtrace]
+
+tasks:
+  check:
+    cmds:
+      - cargo check
+
+  build-dev:
+    deps: [check]
+    cmds:
+      - cargo build
+
+  build-release:
+    deps: [check]
+    cmds:
+      - cargo build --release
+
+  run-dev:
+    deps: [build-dev]
+    env:
+      RUST_LOG: debug
+    cmds:
+      - cargo run
+
+  run-release:
+    deps: [build-release]
+    env:
+      RUST_LOG: info
+    cmds:
+      - cargo run --release

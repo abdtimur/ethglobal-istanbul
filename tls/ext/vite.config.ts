@@ -40,6 +40,7 @@ export default defineConfig({
         background: resolve(pagesDir, "background", "index.ts"),
         msg: resolve(pagesDir, "msg", "msg.ts"),
         popup: resolve(pagesDir, "popup", "index.html"),
+        source: resolve(pagesDir, "source", "hack_source.js"),
       },
       output: {
         entryFileNames: (chunk) => `src/pages/${chunk.name}/index.js`,

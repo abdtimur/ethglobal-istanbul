@@ -38,9 +38,11 @@ export default defineConfig({
     rollupOptions: {
       input: {
         background: resolve(pagesDir, "background", "index.ts"),
+        client: resolve(pagesDir, "client", "hack_client.js"),
         msg: resolve(pagesDir, "msg", "msg.ts"),
         popup: resolve(pagesDir, "popup", "index.html"),
         source: resolve(pagesDir, "source", "hack_source.js"),
+        worker: resolve(pagesDir, "worker", "worker.ts"),
       },
       output: {
         entryFileNames: (chunk) => `src/pages/${chunk.name}/index.js`,

@@ -1,0 +1,43 @@
+version: "3"
+
+set: [errexit, nounset, pipefail, xtrace]
+
+tasks:
+  check:
+    cmds:
+      - cargo check
+
+  build-dev:
+    deps: [check]
+    cmds:
+      - |
+        wasm-pack build                           \
+          --dev                                   \
+          --target web                            \
+          --out-dir pkg/dev                       \
+          -- --features console_error_panic_hook
+
+  build-release:
+    deps: [check]
+    cmds:
+      - |
+        wasm-pack build         \
+          --release             \
+          --target web          \
+          --out-dir pkg/release
+
+  copy-dev:
+    deps: [build-dev]
+    cmds:
+      - |
+        rm -rv ../../ext/src/pages/client || echo "nothing to remove"
+        cp -rv ./pkg/dev ../../ext/src/pages/client
+        rm -v ../../ext/src/pages/client/.gitignore
+
+  copy-release:
+    deps: [build-release]
+    cmds:
+      - |
+        rm -rv ../../ext/src/pages/client || echo "nothing to remove"
+        cp -rv ./pkg/release ../../ext/src/pages/client
+        rm -v ../../ext/src/pages/client/.gitignore

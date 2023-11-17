@@ -1,4 +1,7 @@
 [workspace]
+exclude = [
+  "client",
+]
 members = [
   "proxy",
   "source",

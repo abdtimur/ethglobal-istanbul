@@ -1,3 +1,5 @@
+import { Header } from "@pages/msg/msg";
+
 chrome.webRequest.onBeforeSendHeaders.addListener(
   requestHeadersListener,
   { urls: ["<all_urls>"] },
@@ -63,5 +65,34 @@ function requestHeadersListener(
 
   logi("target url identified:", details.url);
 
-  // TODO:
+  const headers = processHeaders(details.requestHeaders);
+  logi("parsed headers:", JSON.stringify(headers));
+
+  chrome.runtime
+    .sendMessage({
+      url: details.url,
+      headers: headers,
+    })
+    .catch((err) =>
+      console.warn("[BG] [ERROR]: chrome.runtime.sendMessage failed:", err)
+    );
+}
+
+function processHeaders(
+  headersArray?: chrome.webRequest.HttpHeader[]
+): Header[] {
+  if (!headersArray) {
+    return [];
+  }
+
+  const headers: Header[] = [];
+  for (const header of headersArray) {
+    if (header.name && header.value) {
+      headers.push({
+        name: header.name,
+        value: header.value,
+      });
+    }
+  }
+  return headers;
 }

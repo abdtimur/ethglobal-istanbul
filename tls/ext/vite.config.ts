@@ -38,6 +38,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         background: resolve(pagesDir, "background", "index.ts"),
+        msg: resolve(pagesDir, "msg", "msg.ts"),
         popup: resolve(pagesDir, "popup", "index.html"),
       },
       output: {

@@ -108,8 +108,26 @@ pub struct Source {
 
 impl Source {
     pub fn minify_request(&self, url: &str, headers: &[Header]) -> (String, Vec<Header>) {
-        // TODO:
-        (url.to_string(), headers.to_vec())
+        let shortened_url = match &self.url_shortener {
+            Some(shortener) => shortener.shorten(url),
+            None => url.to_string(),
+        };
+
+        let mut shortened_headers: Vec<Header> = Vec::new();
+        for header in headers {
+            let name = header.name.to_lowercase();
+            let allowed_header = match self.allowed_headers.get(&name) {
+                Some(allowed_header) => allowed_header,
+                None => continue,
+            };
+            let shortened_value = allowed_header.shorten(&header.value);
+            shortened_headers.push(Header {
+                name,
+                value: shortened_value,
+            });
+        }
+
+        (shortened_url, shortened_headers)
     }
 }
 

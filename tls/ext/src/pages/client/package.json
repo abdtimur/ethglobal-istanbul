@@ -1,0 +1,18 @@
+{
+  "name": "hack_client",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abdtimur/ethglobal-istanbul"
+  },
+  "files": [
+    "hack_client_bg.wasm",
+    "hack_client.js",
+    "hack_client.d.ts"
+  ],
+  "module": "hack_client.js",
+  "types": "hack_client.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

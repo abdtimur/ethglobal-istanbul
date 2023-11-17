@@ -5,6 +5,11 @@ import {
   CreateZoomMeetingResponseDto,
 } from './types';
 
+const USER_ID = 'me';
+
+import { getToken, ZOOM_API_BASE_URL } from './utils';
+import axios from 'axios';
+
 @Injectable()
 export class ZoomService {
   constructor() {}
@@ -14,6 +19,16 @@ export class ZoomService {
   ): Promise<CreateZoomMeetingResponseDto> {
     console.log(createMeetingDto);
 
+    const token = await getToken();
+    console.log(token);
+    const response = await axios.post(`${ZOOM_API_BASE_URL}/users/${USER_ID}/meetings`, {},{
+      headers: {
+        Authorization: `Bearer ${token.access_token}`,
+      },
+    });
+
+    console.log(response);
+    
     return {
       id: 123,
       join_url: 'https://zoom.us/j/123',
@@ -21,9 +36,4 @@ export class ZoomService {
     };
   }
 
-  async meetingEnded(zoomEvent: any): Promise<any> {
-    return {
-      response: 'ok',
-    };
-  }
 }

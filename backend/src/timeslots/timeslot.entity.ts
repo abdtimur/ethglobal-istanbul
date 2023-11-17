@@ -24,7 +24,7 @@ export class Timeslot {
   time: string;
 
   @Column()
-  price: number;
+  price: string;
 
   @Column()
   currency: string;
@@ -40,6 +40,9 @@ export class Timeslot {
   @Column('varchar', { nullable: true })
   txHash: string | null;
 
+  @Column('varchar', { nullable: true })
+  txCompletedHash: string | null;
+
   @Column({ type: 'numeric', scale: 0, precision: 78, nullable: true })
   txValue: string | null;
 
@@ -49,9 +52,13 @@ export class Timeslot {
   // Timeslot owner:
 
   @ManyToOne(() => Mentor, (mentor) => mentor.timeslots)
-  @JoinColumn({ name: 'mentorId' })
+  @JoinColumn({ name: 'mentorAccount' })
   mentor: Mentor;
 
   @Column('varchar')
-  mentorId: string;
+  mentorAccount: string;
+
+  constructor(data: Partial<Timeslot>) {
+    Object.assign(this, data);
+  }
 }

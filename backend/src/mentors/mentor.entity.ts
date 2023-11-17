@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
@@ -11,16 +12,16 @@ import { Timeslot } from '../timeslots/timeslot.entity';
 @Entity()
 export class Mentor {
   @PrimaryColumn() // address
-  id: string;
+  account: string;
 
-  @Column('varchar')
-  displayName: string;
+  @Column('varchar', { nullable: true })
+  displayName: string | null;
 
   @Column('varchar', { nullable: true })
   profilePhotoUrl: string | null;
 
   @Column('boolean', { default: false })
-  tlsnVerified: boolean; 
+  tlsnVerified: boolean;
 
   @Column('boolean', { default: false })
   humanVerified: boolean;
@@ -35,5 +36,6 @@ export class Mentor {
   updatedAt: Date;
 
   @OneToMany(() => Timeslot, (timeslot) => timeslot.mentor)
+  @JoinColumn({ referencedColumnName: 'mentorAccount' })
   timeslots: Timeslot[];
 }

@@ -14,6 +14,8 @@ const MentorDetails: React.FC = () => {
   const modal = useRef<HTMLDialogElement>(null);
   const { mentorId } = useParams<{ mentorId: `0x${string}` }>();
 
+  const [success, setSuccess] = useState(false);
+
   const [details, setDetails] = useState<Mentor>();
 
   useEffect(() => {
@@ -31,11 +33,16 @@ const MentorDetails: React.FC = () => {
       mentor: mentorId,
       walletClient,
     });
-
-    const txHash = await contract.write.bookSlot([id, "json"], { value: 0.1 });
-    addRecentTransaction({ hash: txHash, description: "Book slot" });
-    const txs = await publicClient.waitForTransactionReceipt({ hash: txHash });
-    console.log(txs);
+    try {
+      const txHash = await contract.write.bookSlot([id, "json"], {
+        value: 0.1,
+      });
+      addRecentTransaction({ hash: txHash, description: "Book slot" });
+      await publicClient.waitForTransactionReceipt({ hash: txHash });
+      setSuccess(true);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   useEffect(() => {
@@ -46,14 +53,6 @@ const MentorDetails: React.FC = () => {
       );
       const responseJson = await response.json();
       setDetails(responseJson);
-
-      const contractResp = await getMentorsTimeForMentor({
-        publicClient,
-        walletClient,
-        mentor: mentorId,
-      });
-
-      console.log(contractResp);
     };
 
     getDetails();
@@ -102,31 +101,35 @@ const MentorDetails: React.FC = () => {
                 ? "Timeslots"
                 : "No available timeslots"}
             </h3>
-            <div className="flex flex-wrap mt-8 ">
-              {details.timeslots &&
-                details.timeslots.map(({ id, time, date, status }) => (
-                  <button
-                    key={id}
-                    className={`card bg-base-100 shadow-md m-2 hover:shadow-xl border w-fit ${
-                      status === "Booked"
-                        ? "opacity-50"
-                        : "cursor-pointer hover:bg-base-200"
-                    }`}
-                    disabled={status === "Booked"}
-                    onClick={() => handleBookClick(id)}
-                  >
-                    <div className="card-body ">
-                      <div className="card-title">{date}</div>
-                      <div className="card-title">{time}</div>
-                      <div className="card-actions justify-center">
-                        <button className="btn btn-primary btn-sm ">
-                          Book
-                        </button>
+            {!success ? (
+              <div className="flex flex-wrap mt-8 ">
+                {details.timeslots &&
+                  details.timeslots.map(({ id, time, date, status }) => (
+                    <button
+                      key={id}
+                      className={`card bg-base-100 shadow-md m-2 hover:shadow-xl border w-fit ${
+                        status === "Booked"
+                          ? "opacity-50"
+                          : "cursor-pointer hover:bg-base-200"
+                      }`}
+                      disabled={status === "Booked"}
+                      onClick={() => handleBookClick(id)}
+                    >
+                      <div className="card-body ">
+                        <div className="card-title">{date}</div>
+                        <div className="card-title">{time}</div>
+                        <div className="card-actions justify-center">
+                          <button className="btn btn-primary btn-sm ">
+                            Book
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  </button>
-                ))}
-            </div>
+                    </button>
+                  ))}
+              </div>
+            ) : (
+              <div>You've booked a slot!</div>
+            )}
           </>
         ) : (
           <div>Loading...</div>

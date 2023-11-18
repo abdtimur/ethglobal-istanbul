@@ -1,8 +1,8 @@
 {
-  "mumbai": {
+  "sepolia": {
     "MindShare": {
-      "address": "0x88FE8846A6a408F5477f68cACe9f50f911E3BfD7",
-      "startBlock": 42551373
+      "address": "0xeb1984603713C6df4E391738C89371bfCa860797",
+      "startBlock": 4721167
     }
   }
 }

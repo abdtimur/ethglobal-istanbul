@@ -40,12 +40,10 @@ export class TimeslotsController {
   }
 
   @Get('/testPush')
-  async testPush(
-    @Query('account') account: string,
-  ): Promise<any> {
-    if (sendPush('Test', 'Test', account)){
+  async testPush(@Query('account') account: string): Promise<any> {
+    if (sendPush('Test', 'Test', account)) {
       return 'Push sent';
-    }else {
+    } else {
       return 'Push not sent';
     }
   }

@@ -35,3 +35,33 @@ tasks:
           --rm                \
           --publish 7047:8080 \
           localhost/notary
+
+  verifier-build:
+    cmds:
+      - |
+        podman build                        \
+          --file docker/verifier.Dockerfile \
+          --tag verifier                    \
+          .
+
+  verifier-save:
+    deps: [verifier-build]
+    cmds:
+      - |
+        podman save                         \
+          --format docker-archive           \
+          localhost/verifier                \
+          -o docker/export/verifier.tar
+
+  verifier-run:
+    deps: [verifier-build]
+    cmds:
+      - |
+        podman run            \
+          --interactive       \
+          --tty               \
+          --name verifier     \
+          --replace           \
+          --rm                \
+          --publish 8080:8080 \
+          localhost/verifier

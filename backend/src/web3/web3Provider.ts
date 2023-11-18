@@ -1,9 +1,10 @@
 import { ethers } from 'ethers';
 import { mentorsTimeABI, mindShareABI } from '../artifacts/abi';
+import { OptimisticMeetingAbi } from '../artifacts/umaAbi';
 
 const rpcUrls = {
   80001: 'https://rpc-mumbai.maticvigil.com',
-  1: 'https://mainnet.infura.io/v3/yourProjectId',
+  5: 'https://eth-goerli.g.alchemy.com/v2/qzdLAg2Bk2ymTTQr7oxEvie2OynEwWLi',
 };
 
 export function getProvider(chainId: number) {
@@ -75,6 +76,18 @@ export async function getMentorsTimeByMentorAddress(
   const mentorsTimeAddress = await mindShare.getMentorCollection(mentor);
 
   return getMentorsTime(mentorsTimeAddress, chainId, runner);
+}
+
+export function getUmaOracle(
+  address: string,
+  chainId: number,
+  runner?: ethers.Signer | ethers.Provider,
+): ethers.Contract {
+  return new ethers.Contract(
+    address,
+    OptimisticMeetingAbi,
+    runner ?? getProvider(chainId),
+  );
 }
 
 export function getMindShare(

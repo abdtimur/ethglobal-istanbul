@@ -27,6 +27,7 @@ tasks:
   run-release:
     deps: [build-release]
     env:
-      RUST_LOG: info
+      # RUST_LOG: info
+      RUST_LOG: debug
     cmds:
       - cargo run --release

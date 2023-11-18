@@ -20,9 +20,7 @@ describe("Fellow Deal Tests", function () {
     const worldIdVerificator = await (
       await WorldID.connect(owner).deploy(
         mindShareContract.target,
-        "0x719683F13Eeea7D84fCBa5d7d17Bf82e03E3d260",
-        "test_app",
-        "test_action"
+        "0x719683F13Eeea7D84fCBa5d7d17Bf82e03E3d260"
       )
     ).waitForDeployment();
 

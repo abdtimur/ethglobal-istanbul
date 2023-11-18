@@ -1,4 +1,4 @@
-pragma solidity 0.8.21;
+pragma solidity 0.8.20;
 
 import { IEAS, AttestationRequest, AttestationRequestData } from "@ethereum-attestation-service/eas-contracts/contracts/IEAS.sol";
 import { NO_EXPIRATION_TIME, EMPTY_UID } from "@ethereum-attestation-service/eas-contracts/contracts/Common.sol";

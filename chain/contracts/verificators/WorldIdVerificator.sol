@@ -15,15 +15,12 @@ contract WorldIdVerificator is BaseMindVerificator {
     /// @dev The World ID group ID (1 for Orb-verified)
     uint256 internal immutable _groupId = 1;
 
-    constructor(
-        address baseMind,
-        IWorldID worldId_,
-        string memory appId_,
-        string memory action_
-    ) BaseMindVerificator() {
+    constructor(address baseMind, IWorldID worldId_) BaseMindVerificator() {
         _worldId = worldId_; // 0x719683F13Eeea7D84fCBa5d7d17Bf82e03E3d260 - mumbai
+        string memory _appId = "app_staging_28ac83510c968999a3c12326b8d4bfa1";
+        string memory _action = "proof_humanity";
         _externalNullifierHash = hashToField(
-            abi.encodePacked(hashToField(abi.encodePacked(appId_)), action_)
+            abi.encodePacked(hashToField(abi.encodePacked(_appId)), _action)
         );
 
         setMindShare(baseMind);

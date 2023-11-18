@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
-pragma solidity 0.8.16;
+pragma solidity 0.8.20;
 
-import "https://github.com/UMAprotocol/protocol/blob/7a93650a7494eaee83756382a18ecf11314499cf/packages/core/contracts/optimistic-oracle-v3/interfaces/OptimisticOracleV3Interface.sol";
+import {OptimisticOracleV3Interface} from "../helpers/OptimisticOracle.sol";
 
 // ***************************************
 // *    Minimum Viable OOV3 Integration  *

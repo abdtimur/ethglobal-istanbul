@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, Outlet } from "react-router-dom";
+import anonimousAvatar from "../assets/anonymous.jpg";
 
 const CardsList: React.FC = () => {
   const [mentors, setMentors] = useState([]);
@@ -27,9 +28,7 @@ const CardsList: React.FC = () => {
                   <div className="avatar">
                     <div className="w-12 rounded-full mr-2">
                       <img
-                        src={
-                          profilePhotoUrl || "https://i.pravatar.cc/500?img=32"
-                        }
+                        src={profilePhotoUrl || anonimousAvatar}
                         alt="avatar"
                       />
                     </div>

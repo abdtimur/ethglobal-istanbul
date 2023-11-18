@@ -36,19 +36,19 @@ function App() {
         <div className="tabs tabs-boxed w-fit">
           <NavLink
             to="/"
-            className={({ isActive }) => `tab ${isActive && "tab-active"}`}
+            className={({ isActive }) => `tab w-36 ${isActive && "tab-active"}`}
           >
             Profile
           </NavLink>
           <NavLink
             to="/mentors"
-            className={({ isActive }) => `tab ${isActive && "tab-active"}`}
+            className={({ isActive }) => `tab w-36 ${isActive && "tab-active"}`}
           >
             Mentors
           </NavLink>
           <NavLink
             to="/booked"
-            className={({ isActive }) => `tab ${isActive && "tab-active"}`}
+            className={({ isActive }) => `tab w-36 ${isActive && "tab-active"}`}
           >
             Booked slots
           </NavLink>

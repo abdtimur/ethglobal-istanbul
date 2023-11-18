@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Mentor } from "../types";
 
+import anonimousAvatar from "../assets/anonymous.jpg";
+
 const MentorDetails: React.FC = () => {
   const modal = useRef<HTMLDialogElement>(null);
   const { mentorId } = useParams<{ mentorId: string }>();
@@ -40,10 +42,7 @@ const MentorDetails: React.FC = () => {
                 <div className="avatar">
                   <div className="w-12 rounded-full mr-2">
                     <img
-                      src={
-                        details.profilePhotoUrl ||
-                        "https://i.pravatar.cc/500?img=32"
-                      }
+                      src={details.profilePhotoUrl || anonimousAvatar}
                       alt="avatar"
                     />
                   </div>

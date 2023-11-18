@@ -102,7 +102,10 @@ const Profile: React.FC = () => {
       )}
     </div>
   ) : (
-    <div className="flex justify-center align-center h-screen">
+    <div className="mt-4">
+      <h3 className="font-bold text-md mb-4">
+        Connect your wallet to view your profile
+      </h3>
       <ConnectButton />
     </div>
   );

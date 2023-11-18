@@ -23,6 +23,9 @@ contract MentorsTime is ERC721 {
 
     string private _mentorName;
 
+    bool private _attested;
+    bytes32 private _attestationUID;
+
     modifier onlyMentorOrMindShare() {
         require(
             msg.sender == mentor || msg.sender == address(_mindShare),
@@ -45,8 +48,11 @@ contract MentorsTime is ERC721 {
         verifyHuman = false;
         verifyTLSN = false;
         verifyPoligonID = false;
-        allowedToMint = true; // workaround for the first demo
+        allowedToMint = false; // let's see
         _nextSlotId = 1;
+
+        _attested = false;
+        _attestationUID = "not issued";
     }
 
     function changeName(
@@ -80,8 +86,24 @@ contract MentorsTime is ERC721 {
     }
 
     function _chechFullyVerified() internal {
-        allowedToMint = true;
-        // allowedToMint = verifyHuman && verifyTLSN && verifyPoligonID;
+        allowedToMint = verifyHuman && verifyTLSN;
+        if (allowedToMint) {
+            bool supportsAttestation = _mindShare.supportsEAS();
+            if (supportsAttestation && !_attested) {
+                bytes32 uid = _mindShare.schemaUID();
+                _attestationUID = _mindShare.attest(
+                    uid,
+                    true,
+                    address(this)
+                );
+                _attested = true;
+                // event emit
+            }
+        }
+    }
+
+    function getAttestationUID() public view returns (bytes32) {
+        return _attestationUID;
     }
 
     function bookSlot(

@@ -30,6 +30,7 @@ const Profile: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [worldIdVerification, setWorldIdVerification] = useState(false);
   const [tlsnVerification, setTlsnVerification] = useState(false);
+  const [attestationUID, setAttestationUID] = useState<string | null>(null);
 
   const verificationModal = useRef<HTMLDialogElement>(null);
 
@@ -190,7 +191,6 @@ const Profile: React.FC = () => {
         }
         console.log("TLSN Verified!");
       } catch (err: any) {
-        debugger;
         console.error(err.reason ?? err.message);
       } finally {
         setTlsnVerification(false);
@@ -270,7 +270,7 @@ const Profile: React.FC = () => {
   }, [address]);
 
   useEffect(() => {
-    if (tlsnVerified) {
+    if (tlsnVerified && profile && !profile.tlsnVerified) {
       verificationModal.current?.showModal();
       try {
         const parsedTlsn: TlsnModel = JSON.parse(tlsnVerified);
@@ -281,6 +281,13 @@ const Profile: React.FC = () => {
       }
     }
   }, [walletClient, address, tlsnVerified]);
+
+  useEffect(() => {
+    if (profile?.humanVerified && profile?.tlsnVerified) {
+      // TODO: call getAttestationUID on collection to get actual UID
+      // if not zero, display as congrats verified mentor
+    }
+  }, [profile]);
 
   return address ? (
     <div className="">

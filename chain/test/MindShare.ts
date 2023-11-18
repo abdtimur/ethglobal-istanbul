@@ -1,6 +1,7 @@
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
+import { EAS_SEPOLIA } from "../scripts/consts";
 const fallbackFinalProof = {
   signed_content: {
     prove_utc_seconds: 1700316662,
@@ -20,9 +21,18 @@ describe("Fellow Deal Tests", function () {
     // Contracts are deployed using the first signer/account by default
     const [owner, mentor, buyer, server] = await ethers.getSigners();
 
+    // deploy mock attester first
+    const MockAttester = await ethers.getContractFactory("MockAttester");
+    const mockAttester = await (
+      await MockAttester.connect(owner).deploy(
+        EAS_SEPOLIA,
+        "0xacaa0b83df28b046b7763a16632540eef547611f29d6da5b0cce6494a5c884d2"
+      )
+    ).waitForDeployment();
+
     const MindShare = await ethers.getContractFactory("MindShare");
     const mindShareContract = await (
-      await MindShare.connect(owner).deploy()
+      await MindShare.connect(owner).deploy(mockAttester.target)
     ).waitForDeployment();
 
     // deploy verificators and set them to MindShare
@@ -44,7 +54,7 @@ describe("Fellow Deal Tests", function () {
       await PolygonId.connect(owner).deploy(mindShareContract.target)
     ).waitForDeployment();
 
-    await mindShareContract.connect(mentor).registerMentor('lolchto');
+    await mindShareContract.connect(mentor).registerMentor("lolchto");
     const getCollectionAddr = await mindShareContract.getMentorCollection(
       mentor.address
     );
@@ -56,8 +66,8 @@ describe("Fellow Deal Tests", function () {
     expect(name).to.equal("lolchto");
 
     // check that minting is possible
-    const mintingPossible = await mentorsTimeFirst.allowedToMint();
-    expect(mintingPossible).to.equal(true);
+    // const mintingPossible = await mentorsTimeFirst.allowedToMint();
+    // expect(mintingPossible).to.equal(true);
 
     await mindShareContract
       .connect(owner)
@@ -120,14 +130,30 @@ describe("Fellow Deal Tests", function () {
       // collection already created and worldId verified
 
       // verify tlsn
-      const serializedContent = JSON.stringify(fallbackFinalProof.signed_content);
+      const serializedContent = JSON.stringify(
+        fallbackFinalProof.signed_content
+      );
       // Convert string to a hexadecimal string
       const hexContent = ethers.toUtf8Bytes(serializedContent);
       // Hash the content
       const hashed = ethers.keccak256(hexContent);
-      await tlsnVerificator.connect(mentor).verifyProof(true, mentor.address, hashed, ethers.getBytes(fallbackFinalProof.signature));
+      await tlsnVerificator
+        .connect(mentor)
+        .verifyProof(
+          true,
+          mentor.address,
+          hashed,
+          ethers.getBytes(fallbackFinalProof.signature)
+        );
       const tlsnVerified = await mentorsTimeFirst.verifyTLSN();
       expect(tlsnVerified).to.equal(true);
+
+      const attestationAvailable = await mindShareContract.supportsEAS();
+      expect(attestationAvailable).to.equal(true);
+      const attestationUID = await mentorsTimeFirst.getAttestationUID();
+      expect(attestationUID).to.equal(
+        "0xacaa0b83df28b046b7763a16632540eef547611f29d6da5b0cce6494a5c884d2"
+      );
 
       // verify polygon
       await polygonIdVerificator
@@ -158,7 +184,9 @@ describe("Fellow Deal Tests", function () {
       const checkOwner1 = await mentorsTimeFirst.ownerOf(1); // buyer should become the owner of the first slot
       expect(checkOwner1).to.equal(buyer.address);
       // check balance changed
-      const balance1 = await ethers.provider.getBalance(mentorsTimeFirst.target);
+      const balance1 = await ethers.provider.getBalance(
+        mentorsTimeFirst.target
+      );
       expect(balance1).to.equal(ethers.parseEther("0.000"));
       // check balance changed
       const balance2 = await ethers.provider.getBalance(mentor.address);

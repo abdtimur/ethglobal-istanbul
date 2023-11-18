@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.20;
 
+import {IEAS} from "@ethereum-attestation-service/eas-contracts/contracts/IEAS.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {IAttester} from "./interfaces/IAttester.sol";
 
 import {MentorsTime} from "./MentorsTime.sol";
 
@@ -19,6 +21,8 @@ contract MindShare is Ownable {
 
     mapping(address verificator => Verificator) private _verificators; // mapping verificator_address => verificator_type
 
+    IAttester private _attester;
+
     struct SlotRequest {
         address buyer;
         string externalId;
@@ -34,7 +38,9 @@ contract MindShare is Ownable {
         _;
     }
 
-    constructor() Ownable(msg.sender) {}
+    constructor(IAttester attester_) Ownable(msg.sender) {
+        _attester = attester_;
+    }
 
     function registerVerificator(
         address verificator,
@@ -101,5 +107,19 @@ contract MindShare is Ownable {
         return _mentorCollections[mentor];
     }
 
-    // describe mentor config structure
+    function supportsEAS() external view returns (bool) {
+        return _attester.supportsEAS();
+    }
+
+    function schemaUID() external view returns (bytes32) {
+        return _attester.schemaUID();
+    }
+
+    function attest(
+        bytes32 schema,
+        bool isMentor,
+        address recipient
+    ) external returns (bytes32) {
+        return _attester.attest(schema, isMentor, recipient);
+    }
 }

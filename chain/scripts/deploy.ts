@@ -1,8 +1,11 @@
 import { ethers } from "hardhat";
-import { WORLD_ID_MUMBAI } from "./consts";
+import { EAS_SCHEMA_SEPOLIA, EAS_SEPOLIA, WORLD_ID_MUMBAI } from "./consts";
 
 async function replace() {
-  const mindShareContract = await ethers.getContractAt("MindShare", "0x88FE8846A6a408F5477f68cACe9f50f911E3BfD7");
+  const mindShareContract = await ethers.getContractAt(
+    "MindShare",
+    "0x88FE8846A6a408F5477f68cACe9f50f911E3BfD7"
+  );
 
   const Tlsn = await ethers.getContractFactory("TlsnVerificator");
   const tlsnVerificator = await (
@@ -12,14 +15,23 @@ async function replace() {
   console.log("Tlsn deployed to:", tlsnVerificator.target);
 
   await mindShareContract.registerVerificator(tlsnVerificator.target, 2);
-  
+
   console.log(`Done!`);
 }
 
 async function main() {
+  console.log("Deploying contracts...");
+
+  const Attester = await ethers.getContractFactory("MindShareEASAttester");
+  const attester = await (
+    await Attester.deploy(EAS_SEPOLIA, EAS_SCHEMA_SEPOLIA)
+  ).waitForDeployment();
+
+  console.log("Attester deployed to:", attester.target);
+
   const MindShare = await ethers.getContractFactory("MindShare");
   const mindShareContract = await (
-    await MindShare.deploy()
+    await MindShare.deploy(attester.target)
   ).waitForDeployment();
 
   console.log("MindShare deployed to:", mindShareContract.target);

@@ -6,7 +6,7 @@ import {
   worldIdVerificatorABI,
 } from "../artifacts/abi";
 
-const MINDSHARE_ADDRESS = "0x88FE8846A6a408F5477f68cACe9f50f911E3BfD7";
+const MINDSHARE_ADDRESS = "0xEBB0057E6045132ed1Bad6844Eea19825d17a454";
 
 export async function getMindShare({
   publicClient,
@@ -52,7 +52,7 @@ export async function getWorldIdVerificator<WC extends WalletClient>({
   return getContract({
     publicClient,
     walletClient,
-    address: "0x557C8C32FFACaaB85050f8575929Dafb0F3dB8bA",
+    address: "0xdFB93e30DB6A3970b939ab4a007631dc045f6FDf",
     abi: worldIdVerificatorABI,
   });
 }
@@ -67,7 +67,7 @@ export async function getTlsnVerificator<WC extends WalletClient>({
   return getContract({
     publicClient,
     walletClient,
-    address: "0xd86855cB14B0262395F9B63aD7a1e60929308aA3",
+    address: "0xe01D33a984850028bd00799DcD36fD628F997445",
     abi: tlsnVerificatorABI,
   });
 }

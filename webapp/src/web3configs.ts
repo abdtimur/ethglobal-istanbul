@@ -15,7 +15,7 @@ import {
 import { Web3Auth } from "@web3auth/modal";
 // import { OpenloginAdapter } from '@web3auth/openlogin-adapter';
 import { Web3AuthConnector } from "@web3auth/web3auth-wagmi-connector";
-import { Chain, configureChains, createConfig } from "wagmi";
+import { Chain, configureChains, createConfig, sepolia } from "wagmi";
 import {
   mainnet,
   polygon,
@@ -36,7 +36,7 @@ const WEB3ATUH_CLIENT_ID =
   "BKbSNUgwHxX8OST2UavN8SGzBptWk670aeHLZMdbyC2A1mHQH4Gsm8eu6Kv_IN_en5j68RhAomSXUbs-4nHMPBk";
 
 const { chains, publicClient } = configureChains(
-  [polygonMumbai, mainnet, polygon, optimism, arbitrum, base, zora],
+  [sepolia, polygonMumbai, mainnet, polygon, optimism, arbitrum, base, zora],
   [publicProvider()]
 );
 

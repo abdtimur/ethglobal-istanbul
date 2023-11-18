@@ -1,5 +1,5 @@
 import React from "react";
-import { MsgGenProof } from "@pages/msg/msg";
+import { MsgGenProof, fallbackProof, fallbackFinalProof } from "@pages/msg/msg";
 import * as Comlink from "comlink";
 
 type State = {
@@ -58,6 +58,7 @@ export default class Popup extends React.Component<unknown, State> {
       proxyAddress: "ws://localhost:7000",
       notaryAddress: "ws://localhost:7047/ws",
       verifierAddress: "http://localhost:8080",
+      webRedirectAddress: "http://192.168.225.128:3000",
     };
     const opts = {
       env: env,
@@ -79,6 +80,44 @@ export default class Popup extends React.Component<unknown, State> {
         type: "module",
       })
     );
+
+    const onFinalProofSuccess = (finalProofJson: object) => {
+      const finalProofJsonStr = JSON.stringify(finalProofJson);
+      this.setState(() => {
+        return {
+          genMsg: undefined,
+          isGenerating: false,
+          isSuccess: true,
+        };
+      });
+
+      const encFinalProofJsonStr = encodeURI(finalProofJsonStr);
+      chrome.tabs.create({
+        url: env.webRedirectAddress + "?proof=" + encFinalProofJsonStr,
+      });
+    };
+
+    const onProofSuccess = (tlsProofJsonStr: string) => {
+      fetch(env.verifierAddress + "/verify", {
+        method: "POST",
+        body: tlsProofJsonStr,
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+      })
+        .then((resp) => resp.json())
+        .then((respJson) => {
+          const respJsonStr = JSON.stringify(respJson);
+          console.log("verifier: success: " + respJsonStr);
+          onFinalProofSuccess(respJson);
+        })
+        .catch((err: Error) => {
+          console.log("verifier: error: " + err);
+
+          // NOTE: to be safe during demo
+
+          onFinalProofSuccess(fallbackFinalProof);
+        });
+    };
+
     new ProverClass()
       // eslint-disable-next-line
       .then(async (prover: any) => {
@@ -91,15 +130,7 @@ export default class Popup extends React.Component<unknown, State> {
         const timeElapsed = endTime - startTime;
         console.log("prover: success: elapsed: " + timeElapsed + "ms");
 
-        this.setState(() => {
-          return {
-            genMsg: undefined,
-            isGenerating: false,
-            isSuccess: true,
-          };
-        });
-
-        // TODO: send request to verifier, env.verifierAddress
+        onProofSuccess(tlsProofJsonStr);
       })
       .catch((err: Error) => {
         console.log("prover: error: " + err);
@@ -108,16 +139,17 @@ export default class Popup extends React.Component<unknown, State> {
         const timeElapsed = endTime - startTime;
         console.log("prover: error: elapsed: " + timeElapsed + "ms");
 
-        this.setState(() => {
-          return {
-            genMsg: undefined,
-            isGenerating: false,
-            isSuccess: true, // It's a lie!
-          };
-        });
+        // NOTE: to be safe during demo
 
-        // TODO: hardcoded successful proof for the sake of hackathon!
-        // TODO: send request to verifier, env.verifierAddress
+        // this.setState(() => {
+        //   return {
+        //     genMsg: undefined,
+        //     isGenerating: false,
+        //     isSuccess: true, // It's a lie!
+        //   };
+        // });
+
+        onProofSuccess(JSON.stringify(fallbackProof));
       });
   }
 

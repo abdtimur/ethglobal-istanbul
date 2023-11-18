@@ -1,0 +1,97 @@
+version: "3"
+
+set: [errexit, nounset, pipefail, xtrace]
+
+tasks:
+  notary-build:
+    dotenv: ["./notary/fork-params.env"]
+    cmds:
+      - |
+        podman build                      \
+          --build-arg TLSN_FORK_REPO      \
+          --build-arg TLSN_FORK_REV       \
+          --file docker/notary.Dockerfile \
+          --tag notary                    \
+          .
+
+  notary-save:
+    deps: [notary-build]
+    cmds:
+      - |
+        podman save                       \
+          --format docker-archive         \
+          localhost/notary                \
+          -o docker/export/notary.tar
+
+  notary-run:
+    deps: [notary-build]
+    cmds:
+      - |
+        podman run            \
+          --interactive       \
+          --tty               \
+          --name notary       \
+          --replace           \
+          --rm                \
+          --publish 7047:8080 \
+          localhost/notary
+
+  verifier-build:
+    cmds:
+      - |
+        podman build                        \
+          --file docker/verifier.Dockerfile \
+          --tag verifier                    \
+          .
+
+  verifier-save:
+    deps: [verifier-build]
+    cmds:
+      - |
+        podman save                         \
+          --format docker-archive           \
+          localhost/verifier                \
+          -o docker/export/verifier.tar
+
+  verifier-run:
+    deps: [verifier-build]
+    cmds:
+      - |
+        podman run            \
+          --interactive       \
+          --tty               \
+          --name verifier     \
+          --replace           \
+          --rm                \
+          --publish 8080:8080 \
+          localhost/verifier
+
+  proxy-build:
+    cmds:
+      - |
+        podman build                     \
+          --file docker/proxy.Dockerfile \
+          --tag proxy                    \
+          .
+
+  proxy-save:
+    deps: [proxy-build]
+    cmds:
+      - |
+        podman save                      \
+          --format docker-archive        \
+          localhost/proxy                \
+          -o docker/export/proxy.tar
+
+  proxy-run:
+    deps: [proxy-build]
+    cmds:
+      - |
+        podman run            \
+          --interactive       \
+          --tty               \
+          --name proxy        \
+          --replace           \
+          --rm                \
+          --publish 7000:7000 \
+          localhost/proxy

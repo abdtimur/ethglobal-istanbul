@@ -1,10 +1,12 @@
 [workspace]
 exclude = [
   "client",
+  "notary",
 ]
 members = [
   "proxy",
   "source",
+  "verifier",
 ]
 resolver = "2"
 

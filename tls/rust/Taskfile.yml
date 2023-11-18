@@ -12,6 +12,12 @@ includes:
   source:
     taskfile: ./source/Taskfile.yml
     dir: ./source
+  verifier:
+    taskfile: ./verifier/Taskfile.yml
+    dir: ./verifier
+  docker:
+    taskfile: ./Taskfile.docker.yml
+    dir: .
 
 tasks:
   check:
@@ -19,18 +25,21 @@ tasks:
       - client:check
       - proxy:check
       - source:check
+      - verifier:check
 
   build-dev:
     deps:
       - client:build-dev
       - proxy:build-dev
       - source:build-dev
+      - verifier:build-dev
 
   build-release:
     deps:
       - client:build-release
       - proxy:build-release
       - source:build-release
+      - verifier:build-release
 
   ext-copy:
     cmds:

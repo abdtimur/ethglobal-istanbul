@@ -40,7 +40,7 @@ export class TimeslotDto {
     this.txHash = data.txHash;
     this.txCompletedHash = data.txCompletedHash;
     this.txValue = data.txValue;
-    this.callInfo = data.callInfo;
+    this.callInfo = `https://zoom.us/j/${data.callInfo}`;
     this.mentor = data.mentorAccount;
   }
 }

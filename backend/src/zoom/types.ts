@@ -4,7 +4,7 @@ export interface CreateZoomMeetingRequestDto {
   topic: string;
   type: 2;
   start_time: Date;
-  duration: 60;
+  duration: number;
   timezone: 'UTC';
 }
 export interface CreateZoomMeetingResponseDto {

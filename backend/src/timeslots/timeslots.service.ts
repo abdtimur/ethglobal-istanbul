@@ -6,12 +6,19 @@ import { TimeslotDto } from './responses/timeslot.response.dto';
 import { TimeslotStatus } from './types';
 import { BookSlotRequest } from './requests/book-slot.request.dto';
 import { CompleteSlotRequest } from './requests/complete-slot.request.dto';
+import { ZoomService } from '../zoom/zoom.service';
+import {
+  getAdjustedGasPrice,
+  getMentorsTimeByMentorAddress,
+  getSignerWallet,
+} from '../web3/web3Provider';
 
 @Injectable()
 export class TimeslotsService {
   constructor(
     @InjectRepository(Timeslot)
     private readonly timeslotsRepo: Repository<Timeslot>,
+    private readonly zoom: ZoomService,
   ) {}
 
   async findTimeslotById(id: string): Promise<Timeslot> {
@@ -21,6 +28,16 @@ export class TimeslotsService {
     if (!timeslot) {
       throw new NotFoundException(`Timeslot not found for id: ${id}`);
     }
+
+    return timeslot;
+  }
+
+  async findTimeslotByMeetingInfo(
+    callInfo: string,
+  ): Promise<Timeslot | undefined> {
+    const timeslot = await this.timeslotsRepo.findOne({
+      where: { callInfo },
+    });
 
     return timeslot;
   }
@@ -69,7 +86,15 @@ export class TimeslotsService {
     timeslot.status = TimeslotStatus.Booked;
 
     // TODO: Generate zoom link here (zoom module)
-    timeslot.callInfo = 'https://zoom.us/j/1234567890';
+    const meeting = await this.zoom.createMeeting({
+      topic: `Mindshare Meeting with mentor ${timeslot.mentorAccount}`,
+      type: 2,
+      start_time: new Date(`${timeslot.date} ${timeslot.time}`),
+      duration: timeslot.duration,
+      timezone: 'UTC',
+    });
+
+    timeslot.callInfo = meeting.id + '';
     await this.timeslotsRepo.save(timeslot);
 
     return new TimeslotDto(timeslot);
@@ -86,9 +111,25 @@ export class TimeslotsService {
       throw new NotFoundException(`Timeslot not found for id: ${timeslotId}`);
     }
 
-    // TODO: Publish tx on chain and save hash: body.duration
     timeslot.duration = body.duration; // do we need to update here?
-    timeslot.txCompletedHash = 'someTxHash';
+
+    const signerWallet = getSignerWallet(80001);
+    const gasPrice = await getAdjustedGasPrice(80001);
+    const mentorsTime = await getMentorsTimeByMentorAddress(
+      '0x6215AAFD447d8ba4F15A807fc27b3F2CbfA11160',
+      timeslot.mentorAccount,
+      80001,
+      signerWallet,
+    );
+    const tx = await mentorsTime.registerMeetingEnd(
+      timeslot.id,
+      body.duration,
+      { gasPrice, gasLimit: 2000000 },
+    );
+    await tx.wait();
+    console.log(`Send settle tx: ${tx.hash}`);
+
+    timeslot.txCompletedHash = tx.hash;
     timeslot.status = TimeslotStatus.Completed;
 
     await this.timeslotsRepo.save(timeslot);

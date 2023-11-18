@@ -14,6 +14,7 @@ import { TimeslotDto } from './responses/timeslot.response.dto';
 import { BookSlotRequest } from './requests/book-slot.request.dto';
 import { CompleteSlotRequest } from './requests/complete-slot.request.dto';
 import { Response } from 'express';
+import { TimeslotStatus } from './types';
 
 @Controller('timeslots')
 export class TimeslotsController {
@@ -99,12 +100,34 @@ export class TimeslotsController {
       );
 
       const meetingId = zoomEvent.payload.object.id;
-      //todo: complete timeslot, example: duration 163184649 meetingId 86593241537
+      const timeslot =
+        await this.timeslotsService.findTimeslotByMeetingInfo(meetingId);
+      if (!timeslot) {
+        console.log(
+          'Received meeting.ended event for meetingId',
+          meetingId,
+          'but no timeslot found for this meetingId',
+        );
+        res.status(200);
+      }
+      if (timeslot.status != TimeslotStatus.Booked) {
+        console.log(
+          'Received meeting.ended event for meetingId',
+          meetingId,
+          'but timeslot status is not Booked',
+        );
+        res.status(200);
+      }
+      if (timeslot && timeslot.status == TimeslotStatus.Booked) {
+        this.timeslotsService.completeTimeslot(timeslot.id, {
+          duration: Number(durationInMinutes),
+        });
+      }
 
       console.log('duration', durationInMinutes, 'meetingId', meetingId);
 
       res.status(200);
-    }else if (zoomEvent.event === 'meeting.started') {
+    } else if (zoomEvent.event === 'meeting.started') {
       console.log('meeting.started');
       res.status(200);
     }

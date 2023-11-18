@@ -55,6 +55,7 @@ contract MindShare is Ownable {
         // create new collection
         MentorsTime newCollection = new MentorsTime(
             mentor,
+            this, // mindShare
             "MentorName",
             DEFAULT_SLOT_PRICE
         );

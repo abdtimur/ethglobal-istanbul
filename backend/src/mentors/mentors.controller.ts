@@ -10,7 +10,11 @@ export class MentorsController {
 
   @Post('/create')
   async createMentor(@Body() body: CreateMentorRequest): Promise<MentorDto> {
-    return await this.mentors.initMentor(body);
+    if (!this.mentors.findMentor(body.account)) {
+      return await this.mentors.initMentor(body);
+    } else {
+      throw new Error('Mentor already exists');
+    }
   }
 
   @Get('')

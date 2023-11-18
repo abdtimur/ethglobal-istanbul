@@ -23,8 +23,7 @@ contract MindShareEASAttester {
 
     /// @notice Attests to a schema that receives a uint32 and boolean parameters.
     /// @param schema The schema UID to attest to.
-    /// @param twitterFollowersCount The uint32 value to indicate the number of followers.
-    /// @param ownsTwitterAccount The boolean value indicating ownership of Twitter account
+    /// @param isMentor The boolean parameter to attest to.
     /// @return The UID of the new attestation.
     function attest(bytes32 schema, bool isMentor, address recipient ) external returns (bytes32) {
         return

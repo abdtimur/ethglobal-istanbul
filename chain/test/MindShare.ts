@@ -90,5 +90,57 @@ describe("Fellow Deal Tests", function () {
 
   describe("Golden Path", function () {
     //
+    it("Should path the golden path", async function () {
+      const {
+        mindShareContract,
+        mentorsTimeFirst,
+        tlsnVerificator,
+        polygonIdVerificator,
+        owner,
+        mentor,
+        buyer,
+      } = await loadFixture(deployMindShare);
+      // collection already created and worldId verified
+
+      // verify tlsn
+      await tlsnVerificator.connect(mentor).verifyProof(true, mentor.address);
+      const tlsnVerified = await mentorsTimeFirst.verifyTLSN();
+      expect(tlsnVerified).to.equal(true);
+
+      // verify polygon
+      await polygonIdVerificator
+        .connect(mentor)
+        .verifyProof(false, mentor.address);
+      const polygonVerified = await mentorsTimeFirst.verifyPoligonID();
+      expect(polygonVerified).to.equal(true);
+
+      // check that minting is possible
+      const mintingPossible = await mentorsTimeFirst.allowedToMint();
+      expect(mintingPossible).to.equal(true);
+
+      // now, we can alllow buyer to book a slot
+      await mentorsTimeFirst
+        .connect(buyer)
+        .bookSlot("uuid-1", "ipfs:json", { value: ethers.parseEther("0.001") });
+      const checkOwner = await mentorsTimeFirst.ownerOf(1); // mentor should be owner of the first slot
+      expect(checkOwner).to.equal(mentor.address);
+      const tokenURI = await mentorsTimeFirst.tokenURI(1);
+      expect(tokenURI).to.equal("mindshare:ipfs:json");
+      // check balance changed
+      const balance = await ethers.provider.getBalance(mentorsTimeFirst.target);
+      expect(balance).to.equal(ethers.parseEther("0.001"));
+      const mentorBalance = await ethers.provider.getBalance(mentor.address);
+
+      // now we can finish the zoom meeting and complete the slot
+      await mentorsTimeFirst.connect(buyer).registerMeetingEnd("uuid-1", 10); // 10 minutes
+      const checkOwner1 = await mentorsTimeFirst.ownerOf(1); // buyer should become the owner of the first slot
+      expect(checkOwner1).to.equal(buyer.address);
+      // check balance changed
+      const balance1 = await ethers.provider.getBalance(mentorsTimeFirst.target);
+      expect(balance1).to.equal(ethers.parseEther("0.000"));
+      // check balance changed
+      const balance2 = await ethers.provider.getBalance(mentor.address);
+      expect(balance2 - mentorBalance).to.equal(ethers.parseEther("0.001"));
+    });
   });
 });

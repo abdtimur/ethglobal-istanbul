@@ -26,6 +26,8 @@ export class TimeslotDto {
 
   public callInfo: string | null;
 
+  public assertionLink: string | null;
+
   public mentor: string;
 
   constructor(data: Timeslot) {
@@ -41,6 +43,7 @@ export class TimeslotDto {
     this.txCompletedHash = data.txCompletedHash;
     this.txValue = data.txValue;
     this.callInfo = `https://zoom.us/j/${data.callInfo}`;
+    this.assertionLink = data.assertionLink;
     this.mentor = data.mentorAccount;
   }
 }

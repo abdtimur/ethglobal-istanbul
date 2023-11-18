@@ -49,6 +49,9 @@ export class Timeslot {
   @Column('varchar', { nullable: true })
   callInfo: string | null;
 
+  @Column('varchar', { nullable: true })
+  assertionLink: string | null;
+
   // Timeslot owner:
 
   @ManyToOne(() => Mentor, (mentor) => mentor.timeslots)

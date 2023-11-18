@@ -11,7 +11,9 @@ import {
   getAdjustedGasPrice,
   getMentorsTimeByMentorAddress,
   getSignerWallet,
+  getUmaOracle,
 } from '../web3/web3Provider';
+import { ethers } from 'ethers';
 
 @Injectable()
 export class TimeslotsService {
@@ -133,6 +135,25 @@ export class TimeslotsService {
     timeslot.status = TimeslotStatus.Completed;
 
     await this.timeslotsRepo.save(timeslot);
+
+    // if supported, assert to UMA here
+    const signerWalletUma = getSignerWallet(5);
+    const gasPriceUma = await getAdjustedGasPrice(5);
+    const umaContract = getUmaOracle(
+      '0x85782Ea06D28554771928aCdf7f900a354BF9429',
+      5,
+      signerWalletUma,
+    );
+    const txUma = await umaContract.assertTruth(
+      ethers.encodeBytes32String(timeslot.callInfo),
+      ethers.encodeBytes32String(timeslot.duration + ''),
+      ethers.encodeBytes32String(timeslot.date),
+      { gasPrice: gasPriceUma, gasLimit: 2000000 },
+    );
+    await txUma.wait();
+    console.log(`Send assert tx: ${txUma.hash}`);
+
+    timeslot.assertionLink = `https://goerli.etherscan.io/tx/${txUma.hash}`;
 
     return new TimeslotDto(timeslot);
   }

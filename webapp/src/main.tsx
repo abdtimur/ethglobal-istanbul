@@ -18,10 +18,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         appInfo={{
           appName: "MindShare",
         }}
-        theme={darkTheme({
-          accentColor: "oklch(var(--s))",
-          accentColorForeground: "oklch(var(--ac))",
-        })}
+        theme={darkTheme()}
       >
         <BrowserRouter>
           <App />

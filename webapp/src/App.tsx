@@ -33,7 +33,7 @@ function App() {
   return (
     <>
       <Header />
-      <div className="pt-16 px-4">
+      <div className="pt-20 px-4">
         <div className="tabs tabs-boxed w-fit">
           <NavLink
             to="/"

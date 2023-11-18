@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   daisyui: {
-    themes: ['sunset']
+    themes: ['wireframe']
   },
   content: [
     "./index.html",

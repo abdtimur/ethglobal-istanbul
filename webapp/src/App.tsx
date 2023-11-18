@@ -5,6 +5,7 @@ import { MentorDetails } from "./components/MentorDetails";
 import { Profile } from "./components/Profile";
 import { useAccount } from "wagmi";
 import { useEffect } from "react";
+import { BookedList } from "./components/BookedList";
 
 function App() {
   const { address } = useAccount();
@@ -56,6 +57,7 @@ function App() {
         <div className="mt-4">
           <Routes>
             <Route path="/" element={<Profile />} />
+            <Route path="/booked" element={<BookedList />} />
             <Route path="/mentors" element={<CardsList />}>
               <Route path=":mentorId" element={<MentorDetails />} />
             </Route>

@@ -29,9 +29,11 @@ import LOGO from "./assets/google.png";
 
 import { publicProvider } from "wagmi/providers/public";
 
+import { NotifyClient } from "@walletconnect/notify-client";
+
 const NAME = "MindShare";
 
-const WC_PROJECT_ID = "69b67f11efec451f5be58fe541681209";
+export const WC_PROJECT_ID = "69b67f11efec451f5be58fe541681209";
 const WEB3ATUH_CLIENT_ID =
   "BKbSNUgwHxX8OST2UavN8SGzBptWk670aeHLZMdbyC2A1mHQH4Gsm8eu6Kv_IN_en5j68RhAomSXUbs-4nHMPBk";
 

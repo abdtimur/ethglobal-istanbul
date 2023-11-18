@@ -15,6 +15,10 @@ const config: HardhatUserConfig = {
       url: process.env.SEPOLIA_RPC_URL ?? "https://rpc.sepolia.org/",
       accounts: [process.env.KEY_TESTIK!],
     },
+    mumbai: {
+      url: `https://rpc-mumbai.maticvigil.com`,
+      accounts: [process.env.KEY_TESTIK!],
+    },
     zkEVM: {
       url: `https://rpc.public.zkevm-test.net`,
       accounts: [process.env.KEY_TESTIK!],

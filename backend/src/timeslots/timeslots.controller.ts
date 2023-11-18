@@ -143,7 +143,7 @@ export class TimeslotsController {
         });
 
         sendPush("Call completed", "Your call has been completed and money was transferred to the mentor.", updatedTimeslot.account);
-        sendPush("Money earned", "You have earned money "+updatedTimeslot.price+" "+updatedTimeslot.currency, updatedTimeslot.mentorAccount);
+        sendPush("Money earned", "You have earned money "+updatedTimeslot.price+" "+updatedTimeslot.currency, updatedTimeslot.mentor);
       }
 
       console.log('duration', durationInMinutes, 'meetingId', meetingId);

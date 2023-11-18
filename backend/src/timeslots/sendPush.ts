@@ -8,7 +8,7 @@ export async function sendPush(
     {
       method: 'POST',
       headers: {
-        Authorization: 'Bearer f601c1c8-6e1f-4656-af1d-8f39e8c1309a',
+        Authorization: `Bearer ${process.env.WALLETCONNECT_PUSH_TOKEN}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({

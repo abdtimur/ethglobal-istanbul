@@ -43,20 +43,25 @@ contract MindShare is Ownable {
         _verificators[verificator] = Verificator(type_);
     }
 
-    function buySlot(address mentor, SlotRequest memory slotRequest) public {
-        // verify that slot is available
-        // verify that slot is not expired
-        // verify that value is correct
-        // lock value as escrow
-        // transfer NFT to buyer
+    function registerMentor(string memory mentorName) public {
+        _registerMentor(msg.sender, mentorName);
     }
 
-    function _registerMentor(address mentor) public returns (address) {
+    function _registerMentor(
+        address mentor,
+        string memory mentorName
+    ) internal returns (address) {
+        if (_mentorCollections[mentor] != address(0)) {
+            MentorsTime collection = MentorsTime(_mentorCollections[mentor]);
+            collection.changeName(mentorName);
+            return address(collection);
+        }
+
         // create new collection
         MentorsTime newCollection = new MentorsTime(
             mentor,
             this, // mindShare
-            "MentorName",
+            mentorName,
             DEFAULT_SLOT_PRICE
         );
 
@@ -68,7 +73,7 @@ contract MindShare is Ownable {
     function verifyMentor(address mentor, bool status) public onlyVerificator {
         address collectionAddress = _mentorCollections[mentor];
         if (collectionAddress == address(0)) {
-            collectionAddress = _registerMentor(mentor);
+            collectionAddress = _registerMentor(mentor, "MentorName");
             // emit collection created event
         }
         MentorsTime collection = MentorsTime(collectionAddress);

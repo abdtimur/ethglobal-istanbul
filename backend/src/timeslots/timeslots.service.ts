@@ -116,14 +116,14 @@ export class TimeslotsService {
     const signerWallet = getSignerWallet(80001);
     const gasPrice = await getAdjustedGasPrice(80001);
     const mentorsTime = await getMentorsTimeByMentorAddress(
-      '0x6215AAFD447d8ba4F15A807fc27b3F2CbfA11160',
+      '0x88FE8846A6a408F5477f68cACe9f50f911E3BfD7',
       timeslot.mentorAccount,
       80001,
       signerWallet,
     );
     const tx = await mentorsTime.registerMeetingEnd(
       timeslot.id,
-      body.duration,
+      BigInt(body.duration),
       { gasPrice, gasLimit: 2000000 },
     );
     await tx.wait();

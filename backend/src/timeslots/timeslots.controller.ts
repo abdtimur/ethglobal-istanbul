@@ -71,7 +71,7 @@ export class TimeslotsController {
   async meetingEnded(
     @Body() zoomEvent: any,
     @Res() res: Response,
-  ): Promise<any> {
+  ): Promise<void> {
     console.log(zoomEvent);
 
     //Once you receive the request body, create a HMAC SHA-256 hash. Set your webhook's secret token as the secret (salt), and the plainToken value as the string to hash. Output in hex format.
@@ -108,28 +108,24 @@ export class TimeslotsController {
           meetingId,
           'but no timeslot found for this meetingId',
         );
-        res.status(200);
-      }
-      if (timeslot.status != TimeslotStatus.Booked) {
+      } else if (timeslot.status != TimeslotStatus.Booked) {
         console.log(
           'Received meeting.ended event for meetingId',
           meetingId,
           'but timeslot status is not Booked',
         );
-        res.status(200);
-      }
-      if (timeslot && timeslot.status == TimeslotStatus.Booked) {
+      } else if (timeslot && timeslot.status == TimeslotStatus.Booked) {
         this.timeslotsService.completeTimeslot(timeslot.id, {
-          duration: Number(durationInMinutes),
+          duration: Math.ceil(Number(durationInMinutes)),
         });
       }
 
       console.log('duration', durationInMinutes, 'meetingId', meetingId);
 
-      res.status(200);
+      res.status(200).send();
     } else if (zoomEvent.event === 'meeting.started') {
       console.log('meeting.started');
-      res.status(200);
+      res.status(200).send();
     }
   }
 }

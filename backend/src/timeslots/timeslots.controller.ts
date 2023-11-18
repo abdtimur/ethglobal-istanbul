@@ -27,6 +27,16 @@ export class TimeslotsController {
     return this.timeslotsService.findTimeslotsForMentor(mentor);
   }
 
+  @Get('/my-booked')
+  async getBookedTimeslots(
+    @Query('account') account: string,
+  ): Promise<TimeslotDto[]> {
+    if (!account) {
+      return [];
+    }
+    return this.timeslotsService.findBookedTimeslotsForAccount(account);
+  }
+
   @Post(':id/book')
   async bookSlot(
     @Param('id') slotId: string,

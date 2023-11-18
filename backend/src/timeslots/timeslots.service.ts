@@ -1,7 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Timeslot } from './timeslot.entity';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { TimeslotDto } from './responses/timeslot.response.dto';
 import { TimeslotStatus } from './types';
 import { BookSlotRequest } from './requests/book-slot.request.dto';
@@ -28,6 +28,17 @@ export class TimeslotsService {
   async findTimeslotsForMentor(mentorAccount: string): Promise<TimeslotDto[]> {
     const timeslots = await this.timeslotsRepo.find({
       where: { mentorAccount },
+    });
+
+    return timeslots.map((timeslot) => new TimeslotDto(timeslot));
+  }
+
+  async findBookedTimeslotsForAccount(account: string): Promise<TimeslotDto[]> {
+    const timeslots = await this.timeslotsRepo.find({
+      where: {
+        account,
+        status: In([TimeslotStatus.Booked, TimeslotStatus.Completed]),
+      },
     });
 
     return timeslots.map((timeslot) => new TimeslotDto(timeslot));

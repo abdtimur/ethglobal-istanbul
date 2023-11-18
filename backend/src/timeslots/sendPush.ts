@@ -8,11 +8,12 @@ export async function sendPush(
     {
       method: 'POST',
       headers: {
-        Authorization: 'Bearer <NOTIFY_API_SECRET>',
+        Authorization: 'Bearer f601c1c8-6e1f-4656-af1d-8f39e8c1309a',
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         notification: {
-          type: 'a1e53b95-18e5-4af8-9f03-9308ec87b687',
+          type: '9dd89834-3dea-466a-b647-8de17ad59d3c',
           title: title,
           body: body,
         },

@@ -1,6 +1,16 @@
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
+const fallbackFinalProof = {
+  signed_content: {
+    prove_utc_seconds: 1700316662,
+    verify_utc_seconds: 1700316693,
+    provider: "twitter",
+    fact: '{"id":"VXNlcjoyMzM0NzIzNTg5","rest_id":"2334723589","legacy":{"created_at":"Sun Feb 09 07:35:13 +0000 2014","default_profile":true,"followers_count":67,"needs_phone_verification":false,"followed_by":null,"following":null}}',
+  },
+  signature:
+    "0x1CDB0C226C048F38EAA8AF0CE23C981ED6C7EC913423C0434696617C6997C205A42A73EC56237FA061112F18F9DE76FC3C280305B13947EE83710DEF8365857844",
+};
 
 describe("Fellow Deal Tests", function () {
   // We define a fixture to reuse the same setup in every test.
@@ -110,7 +120,12 @@ describe("Fellow Deal Tests", function () {
       // collection already created and worldId verified
 
       // verify tlsn
-      await tlsnVerificator.connect(mentor).verifyProof(true, mentor.address);
+      const serializedContent = JSON.stringify(fallbackFinalProof.signed_content);
+      // Convert string to a hexadecimal string
+      const hexContent = ethers.toUtf8Bytes(serializedContent);
+      // Hash the content
+      const hashed = ethers.keccak256(hexContent);
+      await tlsnVerificator.connect(mentor).verifyProof(true, mentor.address, hashed, ethers.getBytes(fallbackFinalProof.signature));
       const tlsnVerified = await mentorsTimeFirst.verifyTLSN();
       expect(tlsnVerified).to.equal(true);
 

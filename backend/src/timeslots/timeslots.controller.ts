@@ -41,8 +41,8 @@ export class TimeslotsController {
 
   @Get('/testPush')
   async testPush(): Promise<any> {
-    sendPush("Test", "Test", "0x65BD86F02341D223835761A62E5C30201af5f4b2");
-    return "OK";
+    sendPush('Test', 'Test', '0x65BD86F02341D223835761A62E5C30201af5f4b2');
+    return 'OK';
   }
 
   @Post(':id/book')
@@ -55,14 +55,17 @@ export class TimeslotsController {
     }
     const updatedSlot = await this.timeslotsService.bookTimeslot(slotId, body);
 
-    const pushSent = sendPush("Booked slot", "Someone has booked the following slot: "+updatedSlot.time, updatedSlot.mentor);
+    const pushSent = sendPush(
+      'Booked slot',
+      'Someone has booked the following slot: ' + updatedSlot.time,
+      updatedSlot.mentor,
+    );
 
     if (!pushSent) {
-      console.log("Push notification not sent");
-    }else{
-      console.log("Push notification sent");
+      console.log('Push notification not sent');
+    } else {
+      console.log('Push notification sent');
     }
-
 
     return updatedSlot;
   }

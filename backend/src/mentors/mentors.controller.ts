@@ -10,11 +10,7 @@ export class MentorsController {
 
   @Post('/create')
   async createMentor(@Body() body: CreateMentorRequest): Promise<MentorDto> {
-    if (!this.mentors.findMentor(body.account)) {
-      return await this.mentors.initMentor(body);
-    } else {
-      throw new Error('Mentor already exists');
-    }
+    return await this.mentors.initMentor(body);
   }
 
   @Get('')
@@ -31,7 +27,10 @@ export class MentorsController {
   }
 
   @Post('/:account/verify')
-  async verifyMentor(@Param('account') mentor: string, @Body() body: verifyMentorRequest) {
+  async verifyMentor(
+    @Param('account') mentor: string,
+    @Body() body: verifyMentorRequest,
+  ) {
     if (!mentor) {
       throw new Error('Mentor is required');
     }

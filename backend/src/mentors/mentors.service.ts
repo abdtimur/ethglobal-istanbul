@@ -1,6 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Mentor } from './mentor.entity';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { MentorDto } from './responses/mentor.response.dto';
 import { verifyMentorRequest } from './requests/verify.mentor.request.dto';
@@ -16,7 +16,19 @@ export class MentorsService {
     private readonly timeslots: TimeslotsService,
   ) {}
 
+  async checkIfExists(account: string): Promise<boolean> {
+    const mentor = await this.mentorsRepo.findOne({ where: { account } });
+    return !!mentor;
+  }
+
   async initMentor(body: CreateMentorRequest): Promise<MentorDto> {
+    const ifExists = await this.checkIfExists(body.account);
+    if (ifExists) {
+      throw new HttpException(
+        `Mentor with account ${body.account} already exists`,
+        400,
+      );
+    }
     const mentor = this.mentorsRepo.create({
       account: body.account,
       displayName: body.displayName ?? null,
@@ -63,7 +75,7 @@ export class MentorsService {
 
     if (allVerified) {
       const timeslotsCount = await this.timeslots.getTimeslotsCount(account);
-      if (timeslotsCount === 4) {
+      if (timeslotsCount === 0) {
         await this.issueNewSlots(mentor);
       }
     }

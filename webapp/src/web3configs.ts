@@ -19,7 +19,7 @@ import LOGO from './assets/google.png';
 
 import { publicProvider } from 'wagmi/providers/public';
 
-const NAME = 'BOILERPLATE';
+const NAME = 'MindShare';
 
 const { chains, publicClient } = configureChains(
   [mainnet, polygon, optimism, arbitrum, base, zora],
@@ -37,7 +37,7 @@ function newWeb3AuthInstance({
 }) {
   const auth = new Web3Auth({
     clientId: 'WEB3ATUH_CLIENT_ID',
-    web3AuthNetwork: 'cyan',
+    web3AuthNetwork: 'sapphire_devnet',
     chainConfig: {
       chainNamespace: CHAIN_NAMESPACES.EIP155,
       chainId: `0x${chains[0].id.toString(16)}`,

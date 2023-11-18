@@ -212,27 +212,27 @@ const Profile: React.FC = () => {
   const handleSaveButtonClick = async () => {
     const { displayName, profilePhotoUrl } = profile || {};
     console.log("address", address);
-    if (address) {
-      // check if I see address
-      // if not - register.
-      const mentorsTimeAddress = await getMentorsTimeAddr({
-        publicClient,
-        mentor: address,
-      });
-      if (mentorsTimeAddress === zeroAddress && walletClient) {
-        const mindShare = await getMindShare({ publicClient, walletClient });
-        const txHash = await mindShare.write.registerMentor([displayName]);
-        addRecentTransaction({
-          hash: txHash,
-          description: "Register mentor",
-        });
-        await publicClient.waitForTransactionReceipt({
-          hash: txHash,
-          confirmations: 10,
-        });
-        console.log("Register on-chain, tx: ", txHash);
-      }
-    }
+    // if (address) {
+    //   // check if I see address
+    //   // if not - register.
+    // //   const mentorsTimeAddress = await getMentorsTimeAddr({
+    // //     publicClient,
+    // //     mentor: address,
+    // //   });
+    // //   if (mentorsTimeAddress === zeroAddress && walletClient) {
+    // //     const mindShare = await getMindShare({ publicClient, walletClient });
+    // //     const txHash = await mindShare.write.registerMentor([displayName]);
+    // //     addRecentTransaction({
+    // //       hash: txHash,
+    // //       description: "Register mentor",
+    // //     });
+    // //     await publicClient.waitForTransactionReceipt({
+    // //       hash: txHash,
+    // //       confirmations: 10,
+    // //     });
+    // //     console.log("Register on-chain, tx: ", txHash);
+    // //   }
+    // }
 
     console.log("Updating backend...");
     const response = await fetch(
@@ -245,9 +245,9 @@ const Profile: React.FC = () => {
         body: JSON.stringify({
           displayName,
           profilePhotoUrl,
-          human: true,
-          polygonId: true,
-          tlsn: true,
+          // human: true,
+          // polygonId: true,
+          // tlsn: true,
         }),
       }
     );

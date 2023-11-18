@@ -65,3 +65,33 @@ tasks:
           --rm                \
           --publish 8080:8080 \
           localhost/verifier
+
+  proxy-build:
+    cmds:
+      - |
+        podman build                     \
+          --file docker/proxy.Dockerfile \
+          --tag proxy                    \
+          .
+
+  proxy-save:
+    deps: [proxy-build]
+    cmds:
+      - |
+        podman save                      \
+          --format docker-archive        \
+          localhost/proxy                \
+          -o docker/export/proxy.tar
+
+  proxy-run:
+    deps: [proxy-build]
+    cmds:
+      - |
+        podman run            \
+          --interactive       \
+          --tty               \
+          --name proxy        \
+          --replace           \
+          --rm                \
+          --publish 7000:7000 \
+          localhost/proxy

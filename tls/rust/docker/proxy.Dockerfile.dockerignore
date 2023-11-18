@@ -1,0 +1,13 @@
+# Exclude everything
+*
+
+# Include workspace members
+!proxy
+## Include source, but not its WASM artifacts
+!source
+source/pkg
+!verifier
+
+# Include Cargo files
+!/Cargo.lock
+!/Cargo.toml

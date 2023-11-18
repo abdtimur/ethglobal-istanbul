@@ -16,6 +16,7 @@ import { CompleteSlotRequest } from './requests/complete-slot.request.dto';
 import { Response } from 'express';
 import { TimeslotStatus } from './types';
 import { sendPush } from './sendPush';
+import { send } from 'process';
 
 @Controller('api/timeslots')
 export class TimeslotsController {
@@ -40,9 +41,12 @@ export class TimeslotsController {
   }
 
   @Get('/testPush')
-  async testPush(): Promise<any> {
-    sendPush('Test', 'Test', '0x65BD86F02341D223835761A62E5C30201af5f4b2');
-    return 'OK';
+  async testPush(@Query('account') account: string): Promise<any> {
+    if (sendPush('Test', 'Test', account)) {
+      return 'Push sent';
+    } else {
+      return 'Push not sent';
+    }
   }
 
   @Post(':id/book')
@@ -134,9 +138,12 @@ export class TimeslotsController {
           'but timeslot status is not Booked',
         );
       } else if (timeslot && timeslot.status == TimeslotStatus.Booked) {
-        this.timeslotsService.completeTimeslot(timeslot.id, {
+        const updatedTimeslot = await this.timeslotsService.completeTimeslot(timeslot.id, {
           duration: Math.ceil(Number(durationInMinutes)),
         });
+
+        sendPush("Call completed", "Your call has been completed and money was transferred to the mentor.", updatedTimeslot.account);
+        sendPush("Money earned", "You have earned money "+updatedTimeslot.price+" "+updatedTimeslot.currency, updatedTimeslot.mentor);
       }
 
       console.log('duration', durationInMinutes, 'meetingId', meetingId);

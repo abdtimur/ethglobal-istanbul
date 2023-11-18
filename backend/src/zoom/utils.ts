@@ -8,8 +8,6 @@ const getToken = async () => {
   try {
     const { ZOOM_ACCOUNT_ID, ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET } = process.env;
 
-    console.log(ZOOM_ACCOUNT_ID, ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET);
-
     const params = new URLSearchParams({
         grant_type: 'account_credentials',
         account_id: ZOOM_ACCOUNT_ID,

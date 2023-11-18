@@ -1,18 +1,23 @@
+
+
+
 export async function sendPush(
   title: string,
   body: string,
   account: string,
 ): Promise<boolean> {
+  const { WALLETCONNECT_PUSH_TOKEN } = process.env;
   const response = await fetch(
     'https://notify.walletconnect.com/69b67f11efec451f5be58fe541681209/notify',
     {
       method: 'POST',
       headers: {
-        Authorization: 'Bearer <NOTIFY_API_SECRET>',
+        Authorization: `Bearer ${WALLETCONNECT_PUSH_TOKEN}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         notification: {
-          type: 'a1e53b95-18e5-4af8-9f03-9308ec87b687',
+          type: '9dd89834-3dea-466a-b647-8de17ad59d3c',
           title: title,
           body: body,
         },

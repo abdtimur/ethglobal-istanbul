@@ -371,9 +371,19 @@ const Profile: React.FC = () => {
             <h3 className="font-bold text-md">
               Proofs{" "}
               {attestationUID && (
-                <span className="text-success text-xl">
-                  Checked! You are verifyed mentor!
-                </span>
+                <>
+                  <span className="text-success text-xl">
+                    Boom! You are verifyed mentor!{" "}
+                    <a
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline"
+                      href={`https://sepolia.easscan.org/attestation/view/${attestationUID}`}
+                    >
+                      Check it out!
+                    </a>
+                  </span>
+                </>
               )}
             </h3>
             {profile.tlsnVerified ? (

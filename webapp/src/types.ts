@@ -1,7 +1,11 @@
 export type Timeslot = {
   id: string;
+  date: string;
   time: string;
-  booked: boolean;
+  status: 'Free' | 'Booked' | 'Completed' | 'Canceled' | 'Expired';
+  duration: number;
+  price: string;  
+  currency: string;
 }
 
 export type Mentor = {

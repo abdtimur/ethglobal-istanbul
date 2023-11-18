@@ -16,6 +16,7 @@ const Profile: React.FC = () => {
   const addRecentTransaction = useAddRecentTransaction();
   const [profile, setProfile] = useState<Mentor>();
   const [searchParams] = useSearchParams();
+  const [worldIdVerification, setWorldIdVerification] = useState(false);
 
   const tlsnModal = useRef<HTMLDialogElement>(null);
 
@@ -43,7 +44,7 @@ const Profile: React.FC = () => {
         return console.error("Connect the wallet first");
       }
 
-      // setIsCreating(true);
+      setWorldIdVerification(true);
       try {
         const unpackedProof = ethers.AbiCoder.defaultAbiCoder().decode(
           ["uint256[8]"],
@@ -63,7 +64,7 @@ const Profile: React.FC = () => {
         ]);
         addRecentTransaction({
           hash: txHash,
-          description: "Create market",
+          description: "Verify proof",
         });
 
         const receipt = await publicClient.waitForTransactionReceipt({
@@ -71,13 +72,26 @@ const Profile: React.FC = () => {
           confirmations: 10,
         });
         console.log(receipt);
-        // onSuccess();
-        // setIsSuccess(true);
+
+        const response = await fetch(
+          `https://ethg-ist.fly.dev/api/mentors/${address}/verify`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ humanVerified: true }),
+          }
+        );
+
+        if (response.ok) {
+          updateProfile("human", true);
+        }
         console.log("World ID Verified!");
       } catch (err: any) {
         console.error(err.reason ?? err.message);
       } finally {
-        // setIsCreating(false);
+        setWorldIdVerification(false);
       }
     },
     [publicClient, address, addRecentTransaction, walletClient]
@@ -213,8 +227,11 @@ const Profile: React.FC = () => {
                   <button
                     className="btn btn-secondary max-w-xs mt-4"
                     onClick={open}
+                    disabled={worldIdVerification}
                   >
-                    Verify with WorldID
+                    {!worldIdVerification
+                      ? "Verify with WorldID"
+                      : "Verification in progress..."}
                   </button>
                 )}
               </IDKitWidget>

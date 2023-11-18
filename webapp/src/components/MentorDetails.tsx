@@ -3,10 +3,16 @@ import { Link, useParams } from "react-router-dom";
 import { Mentor } from "../types";
 
 import anonimousAvatar from "../assets/anonymous.jpg";
+import { getMentorsTimeForMentor } from "../web3/contracts";
+import { usePublicClient, useWalletClient } from "wagmi";
+import { useAddRecentTransaction } from "@rainbow-me/rainbowkit";
 
 const MentorDetails: React.FC = () => {
+  const publicClient = usePublicClient();
+  const addRecentTransaction = useAddRecentTransaction();
+  const { data: walletClient } = useWalletClient();
   const modal = useRef<HTMLDialogElement>(null);
-  const { mentorId } = useParams<{ mentorId: string }>();
+  const { mentorId } = useParams<{ mentorId: `0x${string}` }>();
 
   const [details, setDetails] = useState<Mentor>();
 
@@ -16,17 +22,38 @@ const MentorDetails: React.FC = () => {
     }
   }, [modal]);
 
-  const handleBookClick = (id: string) => {
+  const handleBookClick = async (id: string) => {
     console.log(id);
+    console.log(mentorId);
+    if (!mentorId || !walletClient) return;
+    const contract = await getMentorsTimeForMentor({
+      publicClient,
+      mentor: mentorId,
+      walletClient,
+    });
+
+    const txHash = await contract.write.bookSlot([id, "json"], { value: 0.1 });
+    addRecentTransaction({ hash: txHash, description: "Book slot" });
+    const txs = await publicClient.waitForTransactionReceipt({ hash: txHash });
+    console.log(txs);
   };
 
   useEffect(() => {
+    if (!mentorId) return;
     const getDetails = async () => {
       const response = await fetch(
         `https://ethg-ist.fly.dev/api/mentors/${mentorId}`
       );
       const responseJson = await response.json();
       setDetails(responseJson);
+
+      const contractResp = await getMentorsTimeForMentor({
+        publicClient,
+        walletClient,
+        mentor: mentorId,
+      });
+
+      console.log(contractResp);
     };
 
     getDetails();
@@ -77,16 +104,19 @@ const MentorDetails: React.FC = () => {
             </h3>
             <div className="flex flex-wrap mt-8 ">
               {details.timeslots &&
-                details.timeslots.map(({ id, time, booked }) => (
+                details.timeslots.map(({ id, time, date, status }) => (
                   <button
                     key={id}
                     className={`card bg-base-100 shadow-md m-2 hover:shadow-xl border w-fit ${
-                      booked ? "opacity-50" : "cursor-pointer hover:bg-base-200"
+                      status === "Booked"
+                        ? "opacity-50"
+                        : "cursor-pointer hover:bg-base-200"
                     }`}
-                    disabled={booked}
+                    disabled={status === "Booked"}
                     onClick={() => handleBookClick(id)}
                   >
                     <div className="card-body ">
+                      <div className="card-title">{date}</div>
                       <div className="card-title">{time}</div>
                       <div className="card-actions justify-center">
                         <button className="btn btn-primary btn-sm ">

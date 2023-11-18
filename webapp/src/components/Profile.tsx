@@ -1,14 +1,19 @@
-import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useEffect, useRef, useState } from "react";
-import { useAccount } from "wagmi";
+import { ConnectButton, useAddRecentTransaction } from "@rainbow-me/rainbowkit";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import type { Mentor } from "../types";
-import { IDKitWidget } from "@worldcoin/idkit";
+import { IDKitWidget, ISuccessResult } from "@worldcoin/idkit";
 
 import anonimousAvatar from "../assets/anonymous.jpg";
 import { useSearchParams } from "react-router-dom";
+import { getWorldIdVerificator } from "../web3/contracts";
+import { ethers } from "ethers";
 
 const Profile: React.FC = () => {
   const { address } = useAccount();
+  const { data: walletClient } = useWalletClient();
+  const publicClient = usePublicClient();
+  const addRecentTransaction = useAddRecentTransaction();
   const [profile, setProfile] = useState<Mentor>();
   const [searchParams] = useSearchParams();
 
@@ -21,6 +26,62 @@ const Profile: React.FC = () => {
       setProfile({ ...profile, [field]: value });
     }
   };
+
+  const onSuccessWorldID = (result: ISuccessResult) => {
+    console.log(result);
+    onVerifyWorldId(result);
+  };
+
+  const onVerifyWorldId = useCallback(
+    async (result: ISuccessResult) => {
+      console.log(result);
+
+      if (!result || !result.merkle_root || !result.proof) {
+        return console.error("Proof generation failed! Please try again.");
+      }
+      if (!walletClient) {
+        return console.error("Connect the wallet first");
+      }
+
+      // setIsCreating(true);
+      try {
+        const unpackedProof = ethers.AbiCoder.defaultAbiCoder().decode(
+          ["uint256[8]"],
+          result.proof
+        )[0];
+
+        const verificator = await getWorldIdVerificator({
+          publicClient,
+          walletClient,
+        });
+        const txHash = await verificator.write.verifyProof([
+          false, // isSupporting
+          address, // mentor address
+          result.merkle_root,
+          result.nullifier_hash,
+          unpackedProof,
+        ]);
+        addRecentTransaction({
+          hash: txHash,
+          description: "Create market",
+        });
+
+        const receipt = await publicClient.waitForTransactionReceipt({
+          hash: txHash,
+          confirmations: 10,
+        });
+        console.log(receipt);
+        // onSuccess();
+        // setIsSuccess(true);
+        console.log("World ID Verified!");
+      } catch (err: any) {
+        console.error(err.reason ?? err.message);
+      } finally {
+        // setIsCreating(false);
+      }
+    },
+    [publicClient, address, addRecentTransaction, walletClient]
+  );
 
   const handleSaveButtonClick = async () => {
     const { displayName, profilePhotoUrl } = profile || {};
@@ -146,9 +207,7 @@ const Profile: React.FC = () => {
                 app_id="app_staging_28ac83510c968999a3c12326b8d4bfa1" // Replace with your Action ID
                 signal={address} // Unique signal for the user, e.g., user ID
                 action="proof_humanity"
-                onSuccess={(data) => {
-                  console.log(data);
-                }}
+                onSuccess={onSuccessWorldID}
               >
                 {({ open }) => (
                   <button

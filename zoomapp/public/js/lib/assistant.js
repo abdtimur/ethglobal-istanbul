@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 
-const openai = new OpenAI({apiKey: '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', dangerouslyAllowBrowser: true});
+const openai = new OpenAI({apiKey: 'OPENAI_API_KEY', dangerouslyAllowBrowser: true});
 
 async function fetchAssistantResponse() {
     try {

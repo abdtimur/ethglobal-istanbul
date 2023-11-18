@@ -1,6 +1,6 @@
 import app from './lib/immersive-app.js';
 import socket from './lib/socket.js';
-import fetchAssistantData from './lib/assistant.js';
+import init from './lib/assistant.js';
 import { draw, drawQuadrant } from './lib/canvas.js';
 
 const colors = {

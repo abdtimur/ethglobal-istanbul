@@ -1,0 +1,32 @@
+[package]
+edition.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+name = "hack_verifier"
+version = "0.1.0"
+
+[dependencies]
+hack_source = { path = "../source" }
+
+env_logger.workspace = true
+eyre.workspace = true
+log.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+actix-cors = "0.6"
+actix-web = "4.4"
+elliptic-curve = { version = "0.13", features = ["pkcs8"] }
+httparse = "1.8"
+p256 = "0.13"
+
+[dependencies.tlsn-core]
+git = "https://github.com/tlsnotary/tlsn.git"
+package = "tlsn-core"
+rev = "f031a5b"
+
+[dependencies.tlsn-tls-core]
+git = "https://github.com/tlsnotary/tlsn.git"
+package = "tlsn-tls-core"
+rev = "f031a5b"

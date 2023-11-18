@@ -21,6 +21,8 @@ tasks:
     deps: [build-dev]
     env:
       RUST_LOG: debug
+      NOTARY_PUBKEY: ../fixture/debug-notary.pub
+      VERIFIER_SECKEY: ../fixture/debug-verifier.key
     cmds:
       - cargo run
 
@@ -29,5 +31,7 @@ tasks:
     env:
       # RUST_LOG: info
       RUST_LOG: debug
+      NOTARY_PUBKEY: ../fixture/debug-notary.pub
+      VERIFIER_SECKEY: ../fixture/debug-verifier.key
     cmds:
       - cargo run --release

@@ -99,7 +99,17 @@ export default class Popup extends React.Component<unknown, State> {
           };
         });
 
-        // TODO: send request to verifier, env.verifierAddress
+        fetch(env.verifierAddress + "/verify", {
+          method: "POST",
+          body: tlsProofJsonStr,
+          headers: { "Content-Type": "application/json; charset=utf-8" },
+        })
+          .then((resp) => resp.json())
+          .then((respJson) =>
+            console.log("verifier: success: " + JSON.stringify(respJson))
+          )
+          // TODO: fake success for this error
+          .catch((err: Error) => console.log("verifier: error: " + err));
       })
       .catch((err: Error) => {
         console.log("prover: error: " + err);

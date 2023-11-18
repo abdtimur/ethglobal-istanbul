@@ -5,6 +5,7 @@ exclude = [
 members = [
   "proxy",
   "source",
+  "verifier",
 ]
 resolver = "2"
 

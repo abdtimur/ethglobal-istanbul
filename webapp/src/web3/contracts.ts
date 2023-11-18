@@ -1,21 +1,24 @@
-import { PublicClient, WalletClient, getContract } from "viem";
+import { PublicClient, WalletClient, getContract, zeroAddress } from "viem";
 import {
   mentorsTimeABI,
   mindShareABI,
   worldIdVerificatorABI,
 } from "../artifacts/abi";
 
-const MINDSHARE_ADDRESS = "0x964f552Bc7796E8f4e138d6F1585C7f692fF1335";
+const MINDSHARE_ADDRESS = "0x6215AAFD447d8ba4F15A807fc27b3F2CbfA11160";
 
 export async function getMindShare({
   publicClient,
-  address= MINDSHARE_ADDRESS,
+  address = MINDSHARE_ADDRESS,
+  walletClient,
 }: {
   publicClient: PublicClient;
   address?: `0x${string}`;
+  walletClient?: WalletClient;
 }) {
   return getContract({
     publicClient,
+    walletClient,
     address,
     abi: mindShareABI,
   });
@@ -53,16 +56,14 @@ export async function getWorldIdVerificator<WC extends WalletClient>({
   });
 }
 
-export async function getMentorsTimeForMentor({
+export async function getMentorsTimeAddr({
   publicClient,
-  mindShare= MINDSHARE_ADDRESS,
+  mindShare = MINDSHARE_ADDRESS,
   mentor,
-  walletClient,
 }: {
   publicClient: PublicClient;
   mindShare?: `0x${string}`;
   mentor: `0x${string}`;
-  walletClient?: WalletClient;
 }) {
   const mindShareContract = await getMindShare({
     publicClient,
@@ -72,7 +73,22 @@ export async function getMentorsTimeForMentor({
     mindShareContract as any
   ).read.getMentorCollection([mentor]);
   console.log("mentorsTimeAddress", mentorsTimeAddress);
-  const mentorsCollectionaddr = mentorsTimeAddress[0];
+  console.log(mentorsTimeAddress === zeroAddress)
+  return mentorsTimeAddress;
+}
 
-  return getMentorsTime({ publicClient, address: mentorsCollectionaddr, walletClient });
+export async function getMentorsTimeForMentor({
+  publicClient,
+  mindShare = MINDSHARE_ADDRESS,
+  mentor,
+  walletClient,
+}: {
+  publicClient: PublicClient;
+  mindShare?: `0x${string}`;
+  mentor: `0x${string}`;
+  walletClient?: WalletClient;
+}) {
+  const address = await getMentorsTimeAddr({ publicClient, mindShare, mentor });
+
+  return getMentorsTime({ publicClient, address, walletClient });
 }

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {MindShare} from "./MindShare.sol";
 
 contract MentorsTime is ERC721 {
     address public mentor;
@@ -16,36 +17,48 @@ contract MentorsTime is ERC721 {
     bool public verifyPoligonID;
     bool public allowedToMint;
 
-    uint256 private _nextSlotId = 0; // tracking the mint process
+    uint256 private _nextSlotId; // tracking the mint process
+
+    MindShare private _mindShare;
+
+    modifier onlyMentorOrMindShare() {
+        require(
+            msg.sender == mentor || msg.sender == address(_mindShare),
+            "MindShare: caller is not verificator"
+        );
+        _;
+    }
 
     constructor(
         address mentor_,
+        MindShare mindShare_,
         string memory mentorName_,
         uint256 slotPrice_
     ) ERC721(mentorName_, "MTIME") {
         mentor = mentor_;
+        _mindShare = mindShare_;
         slotPrice = slotPrice_;
 
         verifyHuman = false;
         verifyTLSN = false;
         verifyPoligonID = false;
-        _nextSlotId = 0;
+        _nextSlotId = 1;
     }
 
     // add only mindShare
-    function setVerifyHuman(bool verifyHuman_) public {
+    function setVerifyHuman(bool verifyHuman_) onlyMentorOrMindShare public {
         verifyHuman = verifyHuman_;
         _chechFullyVerified();
     }
 
     // add only mindShare
-    function setVerifyTLSN(bool verifyTLSN_) public {
+    function setVerifyTLSN(bool verifyTLSN_) onlyMentorOrMindShare public {
         verifyTLSN = verifyTLSN_;
         _chechFullyVerified();
     }
 
     // add only mindShare
-    function setVerifyPoligonID(bool verifyPoligonID_) public {
+    function setVerifyPoligonID(bool verifyPoligonID_) onlyMentorOrMindShare public {
         verifyPoligonID = verifyPoligonID_;
         _chechFullyVerified();
     }
@@ -69,6 +82,8 @@ contract MentorsTime is ERC721 {
         // mint NFT to mentor
         _mint(mentor, _nextSlotId);
         _setTokenURI(_nextSlotId, tokenURI);
+        slotIds[slotExternalId_] = _nextSlotId;
+        slotBuyers[_nextSlotId] = msg.sender;
         _nextSlotId++;
     }
 
@@ -101,10 +116,17 @@ contract MentorsTime is ERC721 {
     }
 
     function _baseURI() internal view override returns (string memory) {
-        return ""; // add IPFS json storage
+        return "mindshare:"; // add IPFS json storage
     }
 
     function _setTokenURI(uint256 tokenId_, string memory tokenURI_) internal {
         tokenURIs[tokenId_] = tokenURI_;
+    }
+
+    function tokenURI(uint256 tokenId) public view override returns (string memory) {
+        _requireOwned(tokenId);
+
+        string memory baseURI = _baseURI();
+        return bytes(baseURI).length > 0 ? string.concat(baseURI, tokenURIs[tokenId]) : "";
     }
 }

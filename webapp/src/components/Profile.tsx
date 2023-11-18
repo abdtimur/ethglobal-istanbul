@@ -6,8 +6,13 @@ import { IDKitWidget, ISuccessResult } from "@worldcoin/idkit";
 
 import anonimousAvatar from "../assets/anonymous.jpg";
 import { useSearchParams } from "react-router-dom";
-import { getWorldIdVerificator } from "../web3/contracts";
+import {
+  getMentorsTimeAddr,
+  getMindShare,
+  getWorldIdVerificator,
+} from "../web3/contracts";
 import { ethers } from "ethers";
+import { zeroAddress } from "viem";
 
 const Profile: React.FC = () => {
   const { address } = useAccount();
@@ -102,6 +107,30 @@ const Profile: React.FC = () => {
 
   const handleSaveButtonClick = async () => {
     const { displayName, profilePhotoUrl } = profile || {};
+
+    if (address) {
+      // check if I see address
+      // if not - register.
+      const mentorsTimeAddress = await getMentorsTimeAddr({
+        publicClient,
+        mentor: address,
+      });
+      if (mentorsTimeAddress === zeroAddress) {
+        const mindShare = await getMindShare({ publicClient, walletClient });
+        const txHash = await mindShare.write.registerMentor([displayName]);
+        addRecentTransaction({
+          hash: txHash,
+          description: "Register mentor",
+        });
+        const receipt = await publicClient.waitForTransactionReceipt({
+          hash: txHash,
+          confirmations: 10,
+        });
+        console.log("Register on-chain, tx: ", txHash);
+      }
+    }
+
+    console.log("Updating backend...");
     const response = await fetch(
       `https://ethg-ist.fly.dev/api/mentors/${address}/verify`,
       {

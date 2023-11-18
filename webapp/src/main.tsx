@@ -16,7 +16,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         chains={chains}
         modalSize="compact"
         appInfo={{
-          appName: "Wingman",
+          appName: "MindShare",
         }}
         theme={darkTheme({
           accentColor: "oklch(var(--s))",

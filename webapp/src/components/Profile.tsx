@@ -8,7 +8,9 @@ import HelloIcon from "../assets/Hello.png";
 import anonimousAvatar from "../assets/anon3.png";
 import { useSearchParams } from "react-router-dom";
 import {
+  getMentorsTime,
   getMentorsTimeAddr,
+  getMentorsTimeForMentor,
   getMindShare,
   getTlsnVerificator,
   getWorldIdVerificator,
@@ -284,11 +286,39 @@ const Profile: React.FC = () => {
   }, [walletClient, address, tlsnVerified]);
 
   useEffect(() => {
-    if (profile?.humanVerified && profile?.tlsnVerified) {
+    console.log("profile", profile);
+    if (
+      profile?.humanVerified &&
+      profile?.tlsnVerified &&
+      address &&
+      walletClient &&
+      !attestationUID
+    ) {
       // TODO: call getAttestationUID on collection to get actual UID
       // if not zero, display as congrats verified mentor
+      const checkAttestation = async () => {
+        const contract = await getMentorsTimeForMentor({
+          publicClient,
+          mentor: address,
+          walletClient,
+        });
+        const attestation = await contract.read.getAttestationUID();
+        if (attestation !== "0x0") {
+          setAttestationUID(String(attestation));
+        }
+      };
+
+      checkAttestation();
     }
-  }, [profile]);
+  }, [
+    address,
+    attestationUID,
+    profile,
+    profile?.humanVerified,
+    profile?.tlsnVerified,
+    publicClient,
+    walletClient,
+  ]);
 
   return address ? (
     <div className="">
@@ -338,7 +368,14 @@ const Profile: React.FC = () => {
             </button>
           </div>
           <div className="flex flex-col mt-8">
-            <h3 className="font-bold text-md">Proofs</h3>
+            <h3 className="font-bold text-md">
+              Proofs{" "}
+              {attestationUID && (
+                <span className="text-success text-xl">
+                  Checked! You are verifyed mentor!
+                </span>
+              )}
+            </h3>
             {profile.tlsnVerified ? (
               <p className="text-success mt-4">
                 🎉 Twitter followers verified 🎉

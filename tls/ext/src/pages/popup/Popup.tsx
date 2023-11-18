@@ -58,7 +58,7 @@ export default class Popup extends React.Component<unknown, State> {
       proxyAddress: "ws://localhost:8088",
       notaryAddress: "ws://localhost:7047/ws",
       verifierAddress: "http://localhost:8089",
-      webRedirectAddress: "http://192.168.225.128:3000",
+      webRedirectAddress: "https://ethg-ist-app.fly.dev",
     };
     const opts = {
       env: env,

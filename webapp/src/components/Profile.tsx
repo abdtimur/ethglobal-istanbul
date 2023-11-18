@@ -8,7 +8,6 @@ import HelloIcon from "../assets/Hello.png";
 import anonimousAvatar from "../assets/anon3.png";
 import { useSearchParams } from "react-router-dom";
 import {
-  getMentorsTime,
   getMentorsTimeAddr,
   getMentorsTimeForMentor,
   getMindShare,

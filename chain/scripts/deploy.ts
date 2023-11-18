@@ -1,6 +1,21 @@
 import { ethers } from "hardhat";
 import { WORLD_ID_MUMBAI } from "./consts";
 
+async function replace() {
+  const mindShareContract = await ethers.getContractAt("MindShare", "0x88FE8846A6a408F5477f68cACe9f50f911E3BfD7");
+
+  const Tlsn = await ethers.getContractFactory("TlsnVerificator");
+  const tlsnVerificator = await (
+    await Tlsn.deploy(mindShareContract.target)
+  ).waitForDeployment();
+
+  console.log("Tlsn deployed to:", tlsnVerificator.target);
+
+  await mindShareContract.registerVerificator(tlsnVerificator.target, 2);
+  
+  console.log(`Done!`);
+}
+
 async function main() {
   const MindShare = await ethers.getContractFactory("MindShare");
   const mindShareContract = await (

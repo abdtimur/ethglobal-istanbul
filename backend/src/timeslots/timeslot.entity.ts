@@ -61,6 +61,9 @@ export class Timeslot {
   @Column('varchar')
   mentorAccount: string;
 
+  @Column('varchar', { nullable: true })
+  cid: string | null;
+
   constructor(data: Partial<Timeslot>) {
     Object.assign(this, data);
   }

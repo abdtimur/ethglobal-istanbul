@@ -7,6 +7,10 @@ import { verifyMentorRequest } from './requests/verify.mentor.request.dto';
 import { TimeslotsService } from '../timeslots/timeslots.service';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateMentorRequest } from './requests/create-mentor.request.dto';
+import { NFTStorage } from 'nft.storage';
+
+// TODO:
+const NFT_STORAGE_KEY = 'TODO';
 
 @Injectable()
 export class MentorsService {
@@ -14,7 +18,7 @@ export class MentorsService {
     @InjectRepository(Mentor)
     private readonly mentorsRepo: Repository<Mentor>,
     private readonly timeslots: TimeslotsService,
-  ) {}
+  ) { }
 
   async checkIfExists(account: string): Promise<boolean> {
     const mentor = await this.mentorsRepo.findOne({ where: { account } });
@@ -101,6 +105,7 @@ export class MentorsService {
       currency: BASE_CURRENCY,
       duration: BASE_DURATION,
       mentor: mentor,
+      cid: null,
     };
     const now = new Date().getTime();
     const preparedSlots = [
@@ -129,6 +134,15 @@ export class MentorsService {
         time: '17:00',
       },
     ];
+
+    const nftStorage = new NFTStorage({ token: NFT_STORAGE_KEY });
+    const storePromises = preparedSlots.map((slot) =>
+      nftStorage.storeBlob(new Blob([JSON.stringify(slot)])),
+    );
+    const cids = await Promise.all(storePromises);
+    for (let i = 0; i < preparedSlots.length; i++) {
+      preparedSlots[i].cid = cids[i];
+    }
 
     // TODO: put slots on-chain here first
     // ... waiting transactions to be mined

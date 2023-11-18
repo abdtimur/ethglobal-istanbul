@@ -1,11 +1,14 @@
 import React from "react";
 import { MsgGenProof, fallbackProof, fallbackFinalProof } from "@pages/msg/msg";
 import * as Comlink from "comlink";
+import ProgressBar from "@ramonak/react-progress-bar";
 
 type State = {
   genMsg?: MsgGenProof;
   isGenerating: boolean;
   isSuccess: boolean;
+  progress?: number;
+  intervalId?: NodeJS.Timeout;
 };
 
 export default class Popup extends React.Component<unknown, State> {
@@ -15,9 +18,13 @@ export default class Popup extends React.Component<unknown, State> {
       genMsg: undefined,
       isGenerating: false,
       isSuccess: false,
+      progress: undefined,
+      intervalId: undefined,
     };
     this.handleMessage = this.handleMessage.bind(this);
     this.generate = this.generate.bind(this);
+    this.startProgressAnimation = this.startProgressAnimation.bind(this);
+    this.stopProgressAnimation = this.stopProgressAnimation.bind(this);
   }
 
   componentDidMount() {
@@ -26,15 +33,56 @@ export default class Popup extends React.Component<unknown, State> {
 
   componentWillUnmount() {
     chrome.runtime.onMessage.removeListener(this.handleMessage);
+    this.stopProgressAnimation();
+  }
+
+  startProgressAnimation() {
+    const duration = 50000;
+    const stepTime = 100;
+
+    // Set up the interval to update the state
+    const intervalId = setInterval(() => {
+      this.setState((oldState: State) => {
+        let newProgress =
+          (oldState.progress ?? 0) + (stepTime / duration) * 100;
+        if (newProgress >= 100) {
+          newProgress = 99;
+        }
+        return {
+          genMsg: oldState.genMsg,
+          isGenerating: oldState.isGenerating,
+          isSuccess: oldState.isSuccess,
+          progress: newProgress,
+          intervalId: oldState.intervalId,
+        };
+      });
+    }, stepTime);
+    this.setState((oldState: State) => {
+      return {
+        genMsg: oldState.genMsg,
+        isGenerating: oldState.isGenerating,
+        isSuccess: oldState.isSuccess,
+        progress: oldState.progress,
+        intervalId: intervalId,
+      };
+    });
+  }
+
+  stopProgressAnimation() {
+    if (this.state.intervalId) {
+      clearInterval(this.state.intervalId);
+    }
   }
 
   handleMessage(msg: MsgGenProof) {
     console.log("Popup received message", msg);
-    this.setState(() => {
+    this.setState((oldState: State) => {
       return {
         genMsg: msg,
         isGenerating: false,
         isSuccess: false,
+        progress: oldState.progress,
+        intervalId: oldState.intervalId,
       };
     });
   }
@@ -47,6 +95,8 @@ export default class Popup extends React.Component<unknown, State> {
       console.log("Popup: generate: not genMsg, should never happen!");
       return;
     }
+
+    this.startProgressAnimation();
 
     const input = {
       method: "GET", // NOTE: only GET is supported for now
@@ -70,6 +120,8 @@ export default class Popup extends React.Component<unknown, State> {
         genMsg: oldState.genMsg,
         isGenerating: true,
         isSuccess: false,
+        progress: oldState.progress,
+        intervalId: oldState.intervalId,
       };
     });
 
@@ -83,11 +135,13 @@ export default class Popup extends React.Component<unknown, State> {
 
     const onFinalProofSuccess = (finalProofJson: object) => {
       const finalProofJsonStr = JSON.stringify(finalProofJson);
-      this.setState(() => {
+      this.setState((oldState: State) => {
         return {
           genMsg: undefined,
           isGenerating: false,
           isSuccess: true,
+          progress: oldState.progress,
+          intervalId: oldState.intervalId,
         };
       });
 
@@ -141,14 +195,6 @@ export default class Popup extends React.Component<unknown, State> {
 
         // NOTE: to be safe during demo
 
-        // this.setState(() => {
-        //   return {
-        //     genMsg: undefined,
-        //     isGenerating: false,
-        //     isSuccess: true, // It's a lie!
-        //   };
-        // });
-
         onProofSuccess(JSON.stringify(fallbackProof));
       });
   }
@@ -156,9 +202,10 @@ export default class Popup extends React.Component<unknown, State> {
   render() {
     let title;
     let button;
+    let progress;
     if (this.state.isSuccess) {
       title = (
-        <p className="py-1 text-xs font-bold font-mono">
+        <p className="py-1 text-base font-bold font-mono">
           {"Proof generated successfully! Feel free to close this popup"}
         </p>
       );
@@ -170,11 +217,12 @@ export default class Popup extends React.Component<unknown, State> {
           {"Generate"}
         </button>
       );
+      progress = <div />;
     } else {
       if (this.state.genMsg) {
         if (this.state.isGenerating) {
           title = (
-            <p className="py-1 text-xs font-bold font-mono">
+            <p className="py-1 text-base font-bold font-mono">
               {"Generating proof..."}
             </p>
           );
@@ -186,9 +234,25 @@ export default class Popup extends React.Component<unknown, State> {
               {"Generate"}
             </button>
           );
+          progress = (
+            <ProgressBar
+              completed={
+                Math.round(this.state.progress ?? 0) >= 100
+                  ? 99
+                  : Math.round(this.state.progress ?? 0)
+              }
+              bgColor="#3B82F6"
+              labelAlignment="center"
+              height="15px"
+              labelSize="10px"
+              transitionDuration="0.3s"
+              transitionTimingFunction="linear"
+              className="py-2"
+            />
+          );
         } else {
           title = (
-            <p className="py-1 text-xs font-bold font-mono">
+            <p className="py-1 text-base font-bold font-mono">
               {"Ready to generate proof"}
             </p>
           );
@@ -203,10 +267,11 @@ export default class Popup extends React.Component<unknown, State> {
               {"Generate"}
             </button>
           );
+          progress = <div />;
         }
       } else {
         title = (
-          <p className="py-1 text-xs font-bold font-mono">
+          <p className="py-1 text-base font-bold font-mono">
             {"Open your Twitter profile"}
           </p>
         );
@@ -218,6 +283,7 @@ export default class Popup extends React.Component<unknown, State> {
             {"Generate"}
           </button>
         );
+        progress = <div />;
       }
     }
 
@@ -236,6 +302,7 @@ export default class Popup extends React.Component<unknown, State> {
         </button>
         {title}
         {button}
+        {progress}
       </div>
     );
   }

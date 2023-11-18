@@ -2,6 +2,7 @@ import { PublicClient, WalletClient, getContract, zeroAddress } from "viem";
 import {
   mentorsTimeABI,
   mindShareABI,
+  tlsnVerificatorABI,
   worldIdVerificatorABI,
 } from "../artifacts/abi";
 
@@ -56,6 +57,21 @@ export async function getWorldIdVerificator<WC extends WalletClient>({
   });
 }
 
+export async function getTlsnVerificator<WC extends WalletClient>({
+  publicClient,
+  walletClient,
+}: {
+  publicClient: PublicClient;
+  walletClient?: WC;
+}) {
+  return getContract({
+    publicClient,
+    walletClient,
+    address: "0xd86855cB14B0262395F9B63aD7a1e60929308aA3",
+    abi: tlsnVerificatorABI,
+  });
+}
+
 export async function getMentorsTimeAddr({
   publicClient,
   mindShare = MINDSHARE_ADDRESS,
@@ -69,10 +85,12 @@ export async function getMentorsTimeAddr({
     publicClient,
     address: mindShare,
   });
-  console.log(mindShareContract)
-  const mentorsTimeAddress = await mindShareContract.read.getMentorCollection([mentor]);
+  console.log(mindShareContract);
+  const mentorsTimeAddress = await mindShareContract.read.getMentorCollection([
+    mentor,
+  ]);
   console.log("mentorsTimeAddress", mentorsTimeAddress);
-  console.log(mentorsTimeAddress === zeroAddress)
+  console.log(mentorsTimeAddress === zeroAddress);
   return mentorsTimeAddress;
 }
 
@@ -87,7 +105,11 @@ export async function getMentorsTimeForMentor({
   mentor: `0x${string}`;
   walletClient?: WalletClient;
 }) {
-  const address = await getMentorsTimeAddr({ publicClient, mindShare, mentor });
+  const address = (await getMentorsTimeAddr({
+    publicClient,
+    mindShare,
+    mentor,
+  })) as `0x${string}`;
 
   return getMentorsTime({ publicClient, address, walletClient });
 }

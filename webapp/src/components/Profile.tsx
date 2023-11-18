@@ -1,7 +1,7 @@
 import { ConnectButton, useAddRecentTransaction } from "@rainbow-me/rainbowkit";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
-import type { Mentor } from "../types";
+import type { Mentor, TlsnModel } from "../types";
 import { IDKitWidget, ISuccessResult } from "@worldcoin/idkit";
 
 import anonimousAvatar from "../assets/anonymous.jpg";
@@ -9,10 +9,18 @@ import { useSearchParams } from "react-router-dom";
 import {
   getMentorsTimeAddr,
   getMindShare,
+  getTlsnVerificator,
   getWorldIdVerificator,
 } from "../web3/contracts";
 import { ethers } from "ethers";
-import { zeroAddress } from "viem";
+import {
+  bytesToHex,
+  keccak256,
+  stringToBytes,
+  toBytes,
+  zeroAddress,
+} from "viem";
+import { getBytecode } from "viem/actions";
 
 const Profile: React.FC = () => {
   const { data: walletClient } = useWalletClient();
@@ -22,6 +30,7 @@ const Profile: React.FC = () => {
   const [profile, setProfile] = useState<Mentor>();
   const [searchParams] = useSearchParams();
   const [worldIdVerification, setWorldIdVerification] = useState(false);
+  const [tlsnVerification, setTlsnVerification] = useState(false);
 
   const verificationModal = useRef<HTMLDialogElement>(null);
 
@@ -73,7 +82,7 @@ const Profile: React.FC = () => {
         ]);
         addRecentTransaction({
           hash: txHash,
-          description: "Verify proof",
+          description: "Verify proof World ID",
         });
 
         const receipt = await publicClient.waitForTransactionReceipt({
@@ -82,6 +91,7 @@ const Profile: React.FC = () => {
         });
         console.log(receipt);
 
+        console.log("Finished worldID verificatin, Updating backend...");
         const response = await fetch(
           `https://ethg-ist.fly.dev/api/mentors/${address}/verify`,
           {
@@ -105,6 +115,86 @@ const Profile: React.FC = () => {
         console.error(err.reason ?? err.message);
       } finally {
         setWorldIdVerification(false);
+        verificationModal.current?.close();
+      }
+    },
+    [
+      walletClient,
+      publicClient,
+      address,
+      addRecentTransaction,
+      profile?.tlsnVerified,
+      updateProfile,
+    ]
+  );
+
+  const onVerifyTlsn = useCallback(
+    async (proof: TlsnModel) => {
+      if (!walletClient) {
+        return console.error("Connect the wallet first");
+      }
+
+      setTlsnVerification(true);
+      verificationModal.current?.showModal();
+
+      console.log("Received TLSN proof, pushing to blockchain...");
+      try {
+        // prepare hash & sign
+        const hash = keccak256(
+          stringToBytes(JSON.stringify(proof.signed_content))
+        );
+        const signature = toBytes(`0x${proof.signature}`);
+
+        console.log(`Prepared hash: ${hash} ${signature}`);
+
+        const verificator = await getTlsnVerificator({
+          publicClient,
+          walletClient,
+        });
+
+        console.log(`Prepated verificator: ${verificator.address}`);
+        const txHash = await verificator.write.verifyProof([
+          true, // isSupporting
+          address, // mentor address
+          hash,
+          bytesToHex(signature),
+        ]);
+        addRecentTransaction({
+          hash: txHash,
+          description: "Verify proof TLSN",
+        });
+
+        const receipt = await publicClient.waitForTransactionReceipt({
+          hash: txHash,
+          confirmations: 10,
+        });
+        console.log(receipt);
+
+        console.log("Finished TLSN verification, Updating backend...");
+        const response = await fetch(
+          `https://ethg-ist.fly.dev/api/mentors/${address}/verify`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              tlsn: true,
+              polygonId: true,
+              human: profile?.humanVerified,
+            }),
+          }
+        );
+
+        if (response.ok) {
+          updateProfile("tlsnVerified", true);
+        }
+        console.log("TLSN Verified!");
+      } catch (err: any) {
+        debugger;
+        console.error(err.reason ?? err.message);
+      } finally {
+        setTlsnVerification(false);
         verificationModal.current?.close();
       }
     },
@@ -184,37 +274,14 @@ const Profile: React.FC = () => {
     if (tlsnVerified) {
       verificationModal.current?.showModal();
       try {
-        const parsedTlsn = JSON.parse(tlsnVerified);
-        parsedTlsn.signed_content.fact = JSON.parse(
-          parsedTlsn.signed_content.fact
-        );
-        console.log(parsedTlsn);
-        const verifyTlsn = async () => {
-          const response = await fetch(
-            `https://ethg-ist.fly.dev/api/mentors/${address}/verify-tlsn`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                human: profile?.humanVerified,
-                polygonId: true,
-                tlsn: tlsnVerified,
-              }),
-            }
-          );
-          const responseJson = await response.json();
-          setProfile(responseJson);
-          verificationModal.current?.close();
-        };
+        const parsedTlsn: TlsnModel = JSON.parse(tlsnVerified);
 
-        verifyTlsn();
+        onVerifyTlsn(parsedTlsn);
       } catch (e) {
         console.log(e);
       }
     }
-  }, [address, tlsnVerified]);
+  }, [walletClient, address, tlsnVerified]);
 
   return address ? (
     <div className="">
@@ -266,7 +333,8 @@ const Profile: React.FC = () => {
                 href="https://twitter.com/"
                 className="btn btn-secondary max-w-xs mt-4"
               >
-                Verify Twitter followers
+                Verify Twitter followers{" "}
+                {tlsnVerification && "- In progress..."}
               </a>
             )}
             {profile.humanVerified ? (

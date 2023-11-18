@@ -16,6 +16,7 @@ import { CompleteSlotRequest } from './requests/complete-slot.request.dto';
 import { Response } from 'express';
 import { TimeslotStatus } from './types';
 import { sendPush } from './sendPush';
+import { send } from 'process';
 
 @Controller('api/timeslots')
 export class TimeslotsController {
@@ -137,9 +138,12 @@ export class TimeslotsController {
           'but timeslot status is not Booked',
         );
       } else if (timeslot && timeslot.status == TimeslotStatus.Booked) {
-        this.timeslotsService.completeTimeslot(timeslot.id, {
+        const updatedTimeslot = await this.timeslotsService.completeTimeslot(timeslot.id, {
           duration: Math.ceil(Number(durationInMinutes)),
         });
+
+        sendPush("Call completed", "Your call has been completed and money was transferred to the mentor.", updatedTimeslot.account);
+        sendPush("Money earned", "You have earned money "+updatedTimeslot.price+" "+updatedTimeslot.currency, updatedTimeslot.mentorAccount);
       }
 
       console.log('duration', durationInMinutes, 'meetingId', meetingId);

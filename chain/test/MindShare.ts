@@ -34,6 +34,21 @@ describe("Fellow Deal Tests", function () {
       await PolygonId.connect(owner).deploy(mindShareContract.target)
     ).waitForDeployment();
 
+    await mindShareContract.connect(mentor).registerMentor('lolchto');
+    const getCollectionAddr = await mindShareContract.getMentorCollection(
+      mentor.address
+    );
+    const mentorsTimeFirst = await ethers.getContractAt(
+      "MentorsTime",
+      getCollectionAddr
+    );
+    const name = await mentorsTimeFirst.name();
+    expect(name).to.equal("lolchto");
+
+    // check that minting is possible
+    const mintingPossible = await mentorsTimeFirst.allowedToMint();
+    expect(mintingPossible).to.equal(true);
+
     await mindShareContract
       .connect(owner)
       .registerVerificator(worldIdVerificator.target, 1);
@@ -47,14 +62,6 @@ describe("Fellow Deal Tests", function () {
     await worldIdVerificator
       .connect(mentor)
       .verifyProof(false, mentor.address, 1234, 1234, [1, 2, 3, 4, 5, 6, 7, 8]);
-
-    const getCollectionAddr = await mindShareContract.getMentorCollection(
-      mentor.address
-    );
-    const mentorsTimeFirst = await ethers.getContractAt(
-      "MentorsTime",
-      getCollectionAddr
-    );
 
     return {
       mindShareContract,

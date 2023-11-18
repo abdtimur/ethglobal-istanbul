@@ -21,6 +21,8 @@ contract MentorsTime is ERC721 {
 
     MindShare private _mindShare;
 
+    string private _mentorName;
+
     modifier onlyMentorOrMindShare() {
         require(
             msg.sender == mentor || msg.sender == address(_mindShare),
@@ -38,38 +40,53 @@ contract MentorsTime is ERC721 {
         mentor = mentor_;
         _mindShare = mindShare_;
         slotPrice = slotPrice_;
+        _mentorName = mentorName_;
 
         verifyHuman = false;
         verifyTLSN = false;
         verifyPoligonID = false;
+        allowedToMint = true; // workaround for the first demo
         _nextSlotId = 1;
     }
 
+    function changeName(
+        string memory mentorName_
+    ) public onlyMentorOrMindShare {
+        _mentorName = mentorName_;
+    }
+
+    function name() public view override returns (string memory) {
+        return _mentorName;
+    }
+
     // add only mindShare
-    function setVerifyHuman(bool verifyHuman_) onlyMentorOrMindShare public {
+    function setVerifyHuman(bool verifyHuman_) public onlyMentorOrMindShare {
         verifyHuman = verifyHuman_;
         _chechFullyVerified();
     }
 
     // add only mindShare
-    function setVerifyTLSN(bool verifyTLSN_) onlyMentorOrMindShare public {
+    function setVerifyTLSN(bool verifyTLSN_) public onlyMentorOrMindShare {
         verifyTLSN = verifyTLSN_;
         _chechFullyVerified();
     }
 
     // add only mindShare
-    function setVerifyPoligonID(bool verifyPoligonID_) onlyMentorOrMindShare public {
+    function setVerifyPoligonID(
+        bool verifyPoligonID_
+    ) public onlyMentorOrMindShare {
         verifyPoligonID = verifyPoligonID_;
         _chechFullyVerified();
     }
 
     function _chechFullyVerified() internal {
-        allowedToMint = verifyHuman && verifyTLSN && verifyPoligonID;
+        allowedToMint = true;
+        // allowedToMint = verifyHuman && verifyTLSN && verifyPoligonID;
     }
 
     function bookSlot(
         string memory slotExternalId_,
-        string memory tokenURI
+        string memory tokenURI_
     ) public payable {
         // verify that slot is available (not taken before)
         require(slotIds[slotExternalId_] == 0, "Slot already taken");
@@ -81,7 +98,7 @@ contract MentorsTime is ERC721 {
 
         // mint NFT to mentor
         _mint(mentor, _nextSlotId);
-        _setTokenURI(_nextSlotId, tokenURI);
+        _setTokenURI(_nextSlotId, tokenURI_);
         slotIds[slotExternalId_] = _nextSlotId;
         slotBuyers[_nextSlotId] = msg.sender;
         _nextSlotId++;
@@ -123,10 +140,15 @@ contract MentorsTime is ERC721 {
         tokenURIs[tokenId_] = tokenURI_;
     }
 
-    function tokenURI(uint256 tokenId) public view override returns (string memory) {
+    function tokenURI(
+        uint256 tokenId
+    ) public view override returns (string memory) {
         _requireOwned(tokenId);
 
         string memory baseURI = _baseURI();
-        return bytes(baseURI).length > 0 ? string.concat(baseURI, tokenURIs[tokenId]) : "";
+        return
+            bytes(baseURI).length > 0
+                ? string.concat(baseURI, tokenURIs[tokenId])
+                : "";
     }
 }

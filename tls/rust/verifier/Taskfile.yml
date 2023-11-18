@@ -20,6 +20,7 @@ tasks:
   run-dev:
     deps: [build-dev]
     env:
+      PORT: 8089
       RUST_LOG: debug
       NOTARY_PUBKEY: ../fixture/debug-notary.pub
       VERIFIER_SECKEY: ../fixture/debug-verifier.key
@@ -29,6 +30,7 @@ tasks:
   run-release:
     deps: [build-release]
     env:
+      PORT: 8089
       # RUST_LOG: info
       RUST_LOG: debug
       NOTARY_PUBKEY: ../fixture/debug-notary.pub

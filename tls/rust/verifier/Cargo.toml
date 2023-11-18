@@ -19,6 +19,8 @@ actix-cors = "0.6"
 actix-web = "4.4"
 elliptic-curve = { version = "0.13", features = ["pkcs8"] }
 httparse = "1.8"
+k256 = { version = "0.13", features = ["ecdsa"] }
+keccak-hash = "0.10"
 p256 = "0.13"
 
 [dependencies.tlsn-core]

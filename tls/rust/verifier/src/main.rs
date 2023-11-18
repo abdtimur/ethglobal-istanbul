@@ -13,10 +13,9 @@ use elliptic_curve::pkcs8::{DecodePrivateKey, DecodePublicKey};
 use env_logger::Env;
 use eyre::eyre;
 use httparse::{self, Request};
-use p256::{
-    ecdsa::{signature::Signer, Signature, SigningKey},
-    PublicKey,
-};
+use k256::ecdsa::{signature::Signer, Signature, SigningKey};
+use keccak_hash;
+use p256::PublicKey;
 use serde::{Deserialize, Serialize};
 use std::{
     env,
@@ -312,7 +311,11 @@ impl Verifier {
             eyre!("failed to convert signed content to JSON string: {e}")
         })?;
         let signed_content_bytes = signed_content_json_str.as_bytes();
-        let signature: Signature = self.verifier_seckey.sign(signed_content_bytes);
+        let signed_content_bytes_hash = keccak_hash::keccak(signed_content_bytes);
+
+        let signature: Signature = self
+            .verifier_seckey
+            .sign(signed_content_bytes_hash.as_bytes());
 
         log::debug!("sign content: OK: {signature:?}");
 

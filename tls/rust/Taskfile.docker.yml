@@ -63,7 +63,7 @@ tasks:
           --name verifier     \
           --replace           \
           --rm                \
-          --publish 8080:8080 \
+          --publish 8089:8080 \
           localhost/verifier
 
   proxy-build:
@@ -93,5 +93,5 @@ tasks:
           --name proxy        \
           --replace           \
           --rm                \
-          --publish 7000:7000 \
+          --publish 8088:7000 \
           localhost/proxy

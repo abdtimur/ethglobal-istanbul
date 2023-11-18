@@ -151,7 +151,13 @@ const Profile: React.FC = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ displayName, profilePhotoUrl }),
+        body: JSON.stringify({
+          displayName,
+          profilePhotoUrl,
+          human: true,
+          polygonId: true,
+          tlsn: true,
+        }),
       }
     );
     if (response.ok) {

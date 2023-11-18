@@ -7,6 +7,7 @@ import { DataSource } from 'typeorm';
 import { ZoomModule } from './zoom/zoom.module';
 import { MentorsModule } from './mentors/mentors.module';
 import { TimeslotsModule } from './timeslots/timeslots.module';
+import { AppController } from './app.controller';
 
 const GlobalConfigModule = ConfigModule.forRoot({
   envFilePath:
@@ -41,7 +42,7 @@ const DatabaseModule = TypeOrmModule.forRootAsync({
     MentorsModule,
     TimeslotsModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [],
 })
 export class AppModule {}

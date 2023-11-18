@@ -4,7 +4,7 @@ import { MentorDto } from './responses/mentor.response.dto';
 import { verifyMentorRequest } from './requests/verify.mentor.request.dto';
 import { CreateMentorRequest } from './requests/create-mentor.request.dto';
 
-@Controller('mentors')
+@Controller('api/mentors')
 export class MentorsController {
   constructor(private readonly mentors: MentorsService) {}
 

@@ -16,7 +16,7 @@ import { CompleteSlotRequest } from './requests/complete-slot.request.dto';
 import { Response } from 'express';
 import { TimeslotStatus } from './types';
 
-@Controller('timeslots')
+@Controller('api/timeslots')
 export class TimeslotsController {
   constructor(private readonly timeslotsService: TimeslotsService) {}
 

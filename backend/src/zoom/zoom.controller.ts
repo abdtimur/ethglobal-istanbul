@@ -8,7 +8,7 @@ import {
   ZoomMeetingEndedEvent,
 } from './types';
 
-@Controller('zoom')
+@Controller('api/zoom')
 export class ZoomController {
   constructor(private readonly zoom: ZoomService) {}
 

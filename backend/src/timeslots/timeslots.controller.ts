@@ -15,32 +15,7 @@ import { BookSlotRequest } from './requests/book-slot.request.dto';
 import { CompleteSlotRequest } from './requests/complete-slot.request.dto';
 import { Response } from 'express';
 import { TimeslotStatus } from './types';
-
-async function sendPush(title: string, body: string, account: string){
-  const response = await fetch(
-    'https://notify.walletconnect.com/69b67f11efec451f5be58fe541681209/notify',
-    {
-      method: "POST",
-      headers: {
-        Authorization: 'Bearer <NOTIFY_API_SECRET>'
-      },
-      body: JSON.stringify({
-        notification: {
-          type: "a1e53b95-18e5-4af8-9f03-9308ec87b687", // Notification type ID copied from Cloud 
-          title: title,
-          body: body,
-        },
-        accounts: [
-          "eip155:1:"+ account// CAIP-10 account ID
-        ]
-      })
-    }
-  );
-
-  console.log(response);
-
-
-}
+import { sendPush } from './sendPush';
 
 @Controller('api/timeslots')
 export class TimeslotsController {
@@ -80,8 +55,13 @@ export class TimeslotsController {
     }
     const updatedSlot = await this.timeslotsService.bookTimeslot(slotId, body);
 
-    sendPush("Booked slot", "Someone has booked the following slot: "+updatedSlot.time, updatedSlot.mentor);
+    const pushSent = sendPush("Booked slot", "Someone has booked the following slot: "+updatedSlot.time, updatedSlot.mentor);
 
+    if (!pushSent) {
+      console.log("Push notification not sent");
+    }else{
+      console.log("Push notification sent");
+    }
 
 
     return updatedSlot;

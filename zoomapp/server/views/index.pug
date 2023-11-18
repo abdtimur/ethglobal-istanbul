@@ -17,7 +17,12 @@ block content
         img#logo(src='/img/zoom.png')
         h1.title Digital Twin 
         
-        div#assistantData
+        div#chatContainer
+            div#assistantData(style="height: 600px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;")
+                // Messages will appear here
+            input#userInput(type="text" placeholder="Type your message..." style="width: 80%;")
+            button#sendButton Send
+            div#loadingIndicator(style="display: none;") Loading...
 
 
     else

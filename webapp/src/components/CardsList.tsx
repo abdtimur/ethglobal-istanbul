@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, Outlet } from "react-router-dom";
-import anonimousAvatar from "../assets/anonymous.jpg";
+import anonimousAvatar from "../assets/anon3.png";
+import SuccessIcon from "../assets/Success.png";
 
 const CardsList: React.FC = () => {
   const [mentors, setMentors] = useState([]);
@@ -16,7 +17,15 @@ const CardsList: React.FC = () => {
   }, []);
   return (
     <>
-      <div className="flex flex-wrap ">
+      <div
+        className="flex flex-wrap h-96"
+        style={{
+          backgroundImage: `url(${SuccessIcon})`,
+          backgroundSize: "contain",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "right",
+        }}
+      >
         {mentors.map(({ account, displayName, profilePhotoUrl }) => (
           <Link to={`${account}`} key={account}>
             <div

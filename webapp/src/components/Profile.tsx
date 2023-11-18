@@ -3,8 +3,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import type { Mentor, TlsnModel } from "../types";
 import { IDKitWidget, ISuccessResult } from "@worldcoin/idkit";
+import HelloIcon from "../assets/Hello.png";
 
-import anonimousAvatar from "../assets/anonymous.jpg";
+import anonimousAvatar from "../assets/anon3.png";
 import { useSearchParams } from "react-router-dom";
 import {
   getMentorsTimeAddr,
@@ -293,7 +294,15 @@ const Profile: React.FC = () => {
       </dialog>
       {profile ? (
         <>
-          <div className="flex flex-col mt-4">
+          <div
+            className="flex flex-col mt-4"
+            style={{
+              backgroundImage: `url(${HelloIcon})`,
+              backgroundSize: "contain",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "right",
+            }}
+          >
             <h3 className="font-bold text-md">Main information</h3>
             <div className="avatar">
               <div className="w-32 rounded-xl mt-2">
@@ -365,7 +374,15 @@ const Profile: React.FC = () => {
       )}
     </div>
   ) : (
-    <div className="mt-4">
+    <div
+      className="mt-4 h-96"
+      style={{
+        backgroundImage: `url(${HelloIcon})`,
+        backgroundSize: "contain",
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "right",
+      }}
+    >
       <h3 className="font-bold text-md mb-4">
         Connect your wallet to view your profile
       </h3>

@@ -3,6 +3,7 @@ import { Timeslot } from "../types";
 import { useAccount } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { formatEther } from "viem";
+import DoneIcon from "../assets/Done.png";
 
 const BookedList: React.FC = () => {
   const { address } = useAccount();
@@ -21,7 +22,15 @@ const BookedList: React.FC = () => {
   }, [address]);
 
   return address ? (
-    <div className="flex flex-wrap">
+    <div
+      className="flex flex-wrap h-96 items-start"
+      style={{
+        backgroundImage: `url(${DoneIcon})`,
+        backgroundSize: "contain",
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "right",
+      }}
+    >
       {bookedList?.length ? (
         bookedList.map(
           ({ id, date, status, time, currency, price, callInfo }) => (

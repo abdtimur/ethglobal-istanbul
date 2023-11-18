@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Mentor } from "../types";
 
-import anonimousAvatar from "../assets/anonymous.jpg";
+import anonimousAvatar from "../assets/anon3.png";
 import { getMentorsTimeForMentor } from "../web3/contracts";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import { useAddRecentTransaction } from "@rainbow-me/rainbowkit";

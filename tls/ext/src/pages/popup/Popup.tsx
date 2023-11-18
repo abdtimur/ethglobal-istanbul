@@ -58,6 +58,7 @@ export default class Popup extends React.Component<unknown, State> {
       proxyAddress: "ws://localhost:7000",
       notaryAddress: "ws://localhost:7047/ws",
       verifierAddress: "http://localhost:8080",
+      webRedirectAddress: "http://192.168.225.128:3000",
     };
     const opts = {
       env: env,
@@ -91,23 +92,29 @@ export default class Popup extends React.Component<unknown, State> {
         const timeElapsed = endTime - startTime;
         console.log("prover: success: elapsed: " + timeElapsed + "ms");
 
-        this.setState(() => {
-          return {
-            genMsg: undefined,
-            isGenerating: false,
-            isSuccess: true,
-          };
-        });
-
         fetch(env.verifierAddress + "/verify", {
           method: "POST",
           body: tlsProofJsonStr,
           headers: { "Content-Type": "application/json; charset=utf-8" },
         })
           .then((resp) => resp.json())
-          .then((respJson) =>
-            console.log("verifier: success: " + JSON.stringify(respJson))
-          )
+          .then((respJson) => {
+            const respJsonStr = JSON.stringify(respJson);
+            console.log("verifier: success: " + respJsonStr);
+
+            this.setState(() => {
+              return {
+                genMsg: undefined,
+                isGenerating: false,
+                isSuccess: true,
+              };
+            });
+
+            const encRespJsonStr = encodeURI(respJsonStr);
+            chrome.tabs.create({
+              url: env.webRedirectAddress + "?proof=" + encRespJsonStr,
+            });
+          })
           // TODO: fake success for this error
           .catch((err: Error) => console.log("verifier: error: " + err));
       })

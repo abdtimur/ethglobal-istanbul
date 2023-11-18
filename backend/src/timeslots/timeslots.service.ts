@@ -14,6 +14,7 @@ import {
   getUmaOracle,
 } from '../web3/web3Provider';
 import { ethers } from 'ethers';
+import { CHAIN_ID, MINDSHARE_ADDR } from '../web3/consts';
 
 @Injectable()
 export class TimeslotsService {
@@ -115,12 +116,12 @@ export class TimeslotsService {
 
     timeslot.duration = body.duration; // do we need to update here?
 
-    const signerWallet = getSignerWallet(80001);
-    const gasPrice = await getAdjustedGasPrice(80001);
+    const signerWallet = getSignerWallet(CHAIN_ID);
+    const gasPrice = await getAdjustedGasPrice(CHAIN_ID);
     const mentorsTime = await getMentorsTimeByMentorAddress(
-      '0x88FE8846A6a408F5477f68cACe9f50f911E3BfD7',
+      MINDSHARE_ADDR,
       timeslot.mentorAccount,
-      80001,
+      CHAIN_ID,
       signerWallet,
     );
     const tx = await mentorsTime.registerMeetingEnd(

@@ -5,6 +5,8 @@ import { OptimisticMeetingAbi } from '../artifacts/umaAbi';
 const rpcUrls = {
   80001: 'https://rpc-mumbai.maticvigil.com',
   5: 'https://eth-goerli.g.alchemy.com/v2/qzdLAg2Bk2ymTTQr7oxEvie2OynEwWLi',
+  11155111:
+    'https://eth-sepolia.g.alchemy.com/v2/qzdLAg2Bk2ymTTQr7oxEvie2OynEwWLi',
 };
 
 export function getProvider(chainId: number) {

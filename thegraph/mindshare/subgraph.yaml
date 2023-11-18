@@ -1,0 +1,24 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: MindShare
+    network: mumbai
+    source:
+      address: "0x88FE8846A6a408F5477f68cACe9f50f911E3BfD7"
+      abi: MindShare
+      startBlock: 42551373
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - OwnershipTransferred
+      abis:
+        - name: MindShare
+          file: ./abis/MindShare.json
+      eventHandlers:
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+      file: ./src/mind-share.ts

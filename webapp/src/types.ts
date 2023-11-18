@@ -6,6 +6,7 @@ export type Timeslot = {
   duration: number;
   price: string;  
   currency: string;
+  callInfo: string | null;
 }
 
 export type Mentor = {

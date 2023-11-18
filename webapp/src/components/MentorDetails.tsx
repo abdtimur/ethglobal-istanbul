@@ -6,6 +6,7 @@ import anonimousAvatar from "../assets/anonymous.jpg";
 import { getMentorsTimeForMentor } from "../web3/contracts";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useAddRecentTransaction } from "@rainbow-me/rainbowkit";
+import { formatEther } from "viem";
 
 const MentorDetails: React.FC = () => {
   const publicClient = usePublicClient();
@@ -24,7 +25,7 @@ const MentorDetails: React.FC = () => {
     }
   }, [modal]);
 
-  const handleBookClick = async (id: string) => {
+  const handleBookClick = async (id: string, price: string) => {
     console.log(id);
     console.log(mentorId);
     if (!mentorId || !walletClient) return;
@@ -35,7 +36,7 @@ const MentorDetails: React.FC = () => {
     });
     try {
       const txHash = await contract.write.bookSlot([id, "json"], {
-        value: 0.1,
+        value: price,
       });
       addRecentTransaction({ hash: txHash, description: "Book slot" });
       await publicClient.waitForTransactionReceipt({ hash: txHash });
@@ -104,28 +105,32 @@ const MentorDetails: React.FC = () => {
             {!success ? (
               <div className="flex flex-wrap mt-8 ">
                 {details.timeslots &&
-                  details.timeslots.map(({ id, time, date, status }) => (
-                    <button
-                      key={id}
-                      className={`card bg-base-100 shadow-md m-2 hover:shadow-xl border w-fit ${
-                        status === "Booked"
-                          ? "opacity-50"
-                          : "cursor-pointer hover:bg-base-200"
-                      }`}
-                      disabled={status === "Booked"}
-                      onClick={() => handleBookClick(id)}
-                    >
-                      <div className="card-body ">
-                        <div className="card-title">{date}</div>
-                        <div className="card-title">{time}</div>
-                        <div className="card-actions justify-center">
-                          <button className="btn btn-primary btn-sm ">
-                            Book
-                          </button>
+                  details.timeslots.map(
+                    ({ id, time, date, status, currency, price }) => (
+                      <button
+                        key={id}
+                        className={`card bg-base-100 shadow-md m-2 hover:shadow-xl border w-fit ${
+                          status === "Booked"
+                            ? "opacity-50"
+                            : "cursor-pointer hover:bg-base-200"
+                        }`}
+                        disabled={status === "Booked"}
+                        onClick={() => handleBookClick(id, price)}
+                      >
+                        <div className="card-body items-start ">
+                          <div className="card-title">{`${formatEther(
+                            BigInt(price)
+                          )} ${currency}`}</div>
+                          <div className="card-text">{`${date} at ${time}`}</div>
+                          <div className="card-actions justify-center">
+                            <button className="btn btn-primary btn-sm ">
+                              Book
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    )
+                  )}
               </div>
             ) : (
               <div>You've booked a slot!</div>

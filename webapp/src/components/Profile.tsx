@@ -22,11 +22,14 @@ const Profile: React.FC = () => {
 
   const tlsnVerified = searchParams.get("proof");
 
-  const updateProfile = (field: string, value: string | boolean) => {
-    if (profile) {
-      setProfile({ ...profile, [field]: value });
-    }
-  };
+  const updateProfile = useCallback(
+    (field: string, value: string | boolean) => {
+      if (profile) {
+        setProfile({ ...profile, [field]: value });
+      }
+    },
+    [profile]
+  );
 
   const onSuccessWorldID = (result: ISuccessResult) => {
     console.log(result);
@@ -94,7 +97,7 @@ const Profile: React.FC = () => {
         setWorldIdVerification(false);
       }
     },
-    [publicClient, address, addRecentTransaction, walletClient]
+    [walletClient, publicClient, address, addRecentTransaction, updateProfile]
   );
 
   const handleSaveButtonClick = async () => {

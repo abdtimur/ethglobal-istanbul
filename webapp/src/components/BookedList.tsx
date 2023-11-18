@@ -21,7 +21,7 @@ const BookedList: React.FC = () => {
   }, [address]);
 
   return address ? (
-    <>
+    <div className="flex flex-wrap">
       {bookedList?.length ? (
         bookedList.map(({ id, date, time, currency, price, callInfo }) => (
           <div
@@ -39,9 +39,7 @@ const BookedList: React.FC = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <button className="btn btn-primary btn-sm ">
-                    Start meeting
-                  </button>
+                  <span className="btn btn-primary btn-sm ">Start meeting</span>
                 </a>
               </div>
             </div>
@@ -50,7 +48,7 @@ const BookedList: React.FC = () => {
       ) : (
         <h3 className="font-bold text-md mt-4">You have no booked slots</h3>
       )}
-    </>
+    </div>
   ) : (
     <div className="mt-4">
       <h3 className="font-bold text-md mb-4">

@@ -8,20 +8,12 @@ import HelloIcon from "../assets/Hello.png";
 import anonimousAvatar from "../assets/anon3.png";
 import { useSearchParams } from "react-router-dom";
 import {
-  getMentorsTimeAddr,
   getMentorsTimeForMentor,
-  getMindShare,
   getTlsnVerificator,
   getWorldIdVerificator,
 } from "../web3/contracts";
 import { ethers } from "ethers";
-import {
-  bytesToHex,
-  keccak256,
-  stringToBytes,
-  toBytes,
-  zeroAddress,
-} from "viem";
+import { bytesToHex, keccak256, stringToBytes, toBytes } from "viem";
 
 const Profile: React.FC = () => {
   const { data: walletClient } = useWalletClient();

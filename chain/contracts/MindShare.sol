@@ -23,6 +23,8 @@ contract MindShare is Ownable {
 
     IAttester private _attester;
 
+    event CollectionCreated(address mentor, address collection);
+
     struct SlotRequest {
         address buyer;
         string externalId;
@@ -51,17 +53,18 @@ contract MindShare is Ownable {
 
     function registerMentor(string memory mentorName) public {
         _registerMentor(msg.sender, mentorName);
+        emit CollectionCreated(msg.sender, _mentorCollections[msg.sender]);
     }
 
     function _registerMentor(
         address mentor,
         string memory mentorName
     ) internal returns (address) {
-        if (_mentorCollections[mentor] != address(0)) {
-            MentorsTime collection = MentorsTime(_mentorCollections[mentor]);
-            collection.changeName(mentorName);
-            return address(collection);
-        }
+        // if (_mentorCollections[mentor] != address(0)) {
+        //     MentorsTime collection = MentorsTime(_mentorCollections[mentor]);
+        //     collection.changeName(mentorName);
+        //     return address(collection);
+        // }
 
         // create new collection
         MentorsTime newCollection = new MentorsTime(
@@ -80,7 +83,7 @@ contract MindShare is Ownable {
         address collectionAddress = _mentorCollections[mentor];
         if (collectionAddress == address(0)) {
             collectionAddress = _registerMentor(mentor, "MentorName");
-            // emit collection created event
+            emit CollectionCreated(mentor, collectionAddress);
         }
         MentorsTime collection = MentorsTime(collectionAddress);
 

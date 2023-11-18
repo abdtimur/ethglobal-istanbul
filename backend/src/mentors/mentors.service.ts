@@ -66,9 +66,15 @@ export class MentorsService {
       mentor.profilePhotoUrl = request.profilePhotoUrl;
     }
 
-    mentor.humanVerified = request.human ?? false;
-    mentor.tlsnVerified = request.tlsn ?? false;
-    mentor.polygonIdVerified = request.polygonId ?? false;
+    if (request.human) {
+      mentor.humanVerified = request.human;
+    }
+    if (request.tlsn) {
+      mentor.tlsnVerified = request.tlsn;
+    }
+    if (request.polygonId) {
+      mentor.polygonIdVerified = request.polygonId;
+    }
 
     const allVerified =
       mentor.humanVerified && mentor.tlsnVerified && mentor.polygonIdVerified;
@@ -94,7 +100,7 @@ export class MentorsService {
 
   private async issueNewSlots(mentor: Mentor): Promise<void> {
     const BASE_PRICE = '1000000000000000'; // 0.001; // TODO: Config
-    const BASE_CURRENCY = 'MATIC'; // TODO: Config
+    const BASE_CURRENCY = 'ETH'; // TODO: Config
     const BASE_DURATION = 30;
     const DEFAULT_SLOT = {
       price: BASE_PRICE,

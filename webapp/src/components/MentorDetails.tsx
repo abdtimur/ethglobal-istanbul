@@ -4,8 +4,9 @@ import { Mentor } from "../types";
 
 import anonimousAvatar from "../assets/anonymous.jpg";
 import { getMentorsTimeForMentor } from "../web3/contracts";
-import { usePublicClient, useWalletClient } from "wagmi";
+import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import { useAddRecentTransaction } from "@rainbow-me/rainbowkit";
+import { formatEther } from "viem";
 
 const MentorDetails: React.FC = () => {
   const publicClient = usePublicClient();
@@ -13,6 +14,7 @@ const MentorDetails: React.FC = () => {
   const { data: walletClient } = useWalletClient();
   const modal = useRef<HTMLDialogElement>(null);
   const { mentorId } = useParams<{ mentorId: `0x${string}` }>();
+  const { address } = useAccount();
 
   const [success, setSuccess] = useState(false);
 
@@ -24,9 +26,7 @@ const MentorDetails: React.FC = () => {
     }
   }, [modal]);
 
-  const handleBookClick = async (id: string) => {
-    console.log(id);
-    console.log(mentorId);
+  const handleBookClick = async (id: string, price: string) => {
     if (!mentorId || !walletClient) return;
     const contract = await getMentorsTimeForMentor({
       publicClient,
@@ -35,13 +35,23 @@ const MentorDetails: React.FC = () => {
     });
     try {
       const txHash = await contract.write.bookSlot([id, "json"], {
-        value: 0.1,
+        value: price,
       });
       addRecentTransaction({ hash: txHash, description: "Book slot" });
-      await publicClient.waitForTransactionReceipt({ hash: txHash });
+      const receipt = await publicClient.waitForTransactionReceipt({
+        hash: txHash,
+      });
+      fetch(`https://ethg-ist.fly.dev/api/timeslots/${id}/book`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ txHash, txValue: price, account: address }),
+      });
+      console.log(receipt);
       setSuccess(true);
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   };
 
@@ -96,39 +106,55 @@ const MentorDetails: React.FC = () => {
                 </button>
               </Link>
             </div>
-            <h3 className="font-bold text-md mt-4">
-              {details.timeslots?.length
-                ? "Timeslots"
-                : "No available timeslots"}
-            </h3>
             {!success ? (
-              <div className="flex flex-wrap mt-8 ">
-                {details.timeslots &&
-                  details.timeslots.map(({ id, time, date, status }) => (
-                    <button
-                      key={id}
-                      className={`card bg-base-100 shadow-md m-2 hover:shadow-xl border w-fit ${
-                        status === "Booked"
-                          ? "opacity-50"
-                          : "cursor-pointer hover:bg-base-200"
-                      }`}
-                      disabled={status === "Booked"}
-                      onClick={() => handleBookClick(id)}
-                    >
-                      <div className="card-body ">
-                        <div className="card-title">{date}</div>
-                        <div className="card-title">{time}</div>
-                        <div className="card-actions justify-center">
-                          <button className="btn btn-primary btn-sm ">
-                            Book
-                          </button>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-              </div>
+              <>
+                <h3 className="font-bold text-md mt-4">
+                  {details.timeslots?.length
+                    ? "Timeslots"
+                    : "No available timeslots"}
+                </h3>
+                <div className="flex flex-wrap mt-8 ">
+                  {details.timeslots &&
+                    details.timeslots.map(
+                      ({ id, time, date, status, currency, price }) => (
+                        <button
+                          key={id}
+                          className={`card bg-base-100 shadow-md m-2 hover:shadow-xl border w-fit ${
+                            status === "Booked"
+                              ? "opacity-50"
+                              : "cursor-pointer hover:bg-base-200"
+                          }`}
+                          disabled={status === "Booked"}
+                          onClick={() => handleBookClick(id, price)}
+                        >
+                          <div className="card-body items-start ">
+                            <div className="card-title">{`${formatEther(
+                              BigInt(price)
+                            )} ${currency}`}</div>
+                            <div className="card-text">{`${date} at ${time}`}</div>
+                            <div className="card-actions justify-center">
+                              <span className="btn btn-secondary btn-sm mt-4">
+                                Book
+                              </span>
+                            </div>
+                          </div>
+                        </button>
+                      )
+                    )}
+                </div>
+              </>
             ) : (
-              <div>You've booked a slot!</div>
+              <>
+                <h2 className="text-xl font-bold mt-4 mb-2">
+                  Congradulations!
+                </h2>
+                <div>You've booked a slot!</div>
+                <Link to="/booked">
+                  <button className="btn btn-primary mt-4">
+                    Go you booked section
+                  </button>
+                </Link>
+              </>
             )}
           </>
         ) : (

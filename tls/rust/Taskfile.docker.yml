@@ -15,7 +15,7 @@ tasks:
           .
 
   notary-save:
-    deps: [notary-build]
+    # deps: [notary-build]
     cmds:
       - |
         podman save                       \
@@ -24,7 +24,7 @@ tasks:
           -o docker/export/notary.tar
 
   notary-run:
-    deps: [notary-build]
+    # deps: [notary-build]
     cmds:
       - |
         podman run            \
@@ -45,7 +45,7 @@ tasks:
           .
 
   verifier-save:
-    deps: [verifier-build]
+    # deps: [verifier-build]
     cmds:
       - |
         podman save                         \
@@ -54,7 +54,7 @@ tasks:
           -o docker/export/verifier.tar
 
   verifier-run:
-    deps: [verifier-build]
+    # deps: [verifier-build]
     cmds:
       - |
         podman run            \
@@ -75,7 +75,7 @@ tasks:
           .
 
   proxy-save:
-    deps: [proxy-build]
+    # deps: [proxy-build]
     cmds:
       - |
         podman save                      \
@@ -84,7 +84,7 @@ tasks:
           -o docker/export/proxy.tar
 
   proxy-run:
-    deps: [proxy-build]
+    # deps: [proxy-build]
     cmds:
       - |
         podman run            \

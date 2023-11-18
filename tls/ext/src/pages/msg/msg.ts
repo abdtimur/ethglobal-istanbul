@@ -907,11 +907,11 @@ export const fallbackProof = {
 
 export const fallbackFinalProof = {
   signed_content: {
-    prove_utc_seconds: 1700288586,
-    verify_utc_seconds: 1700288614,
+    prove_utc_seconds: 1700310329,
+    verify_utc_seconds: 1700310347,
     provider: "twitter",
-    fact: '{"id":"VXNlcjoyMzM0NzIzNTg5","rest_id":"2334723589","legacy":{"created_at":"Sun Feb 09 07:35:13 +0000 2014","default_profile":true,"followers_count":67}}',
+    fact: '{"id":"VXNlcjoyMzM0NzIzNTg5","rest_id":"2334723589","legacy":{"created_at":"Sun Feb 09 07:35:13 +0000 2014","default_profile":true,"followers_count":67,"needs_phone_verification":false,"followed_by":null,"following":null}}',
   },
   signature:
-    "178070028696E2166F6718A1CCAAC0211D63A25246A3EBECBD90C7BBD8C5D170AF2A613E4F4AF2F0426D00F0B04FEB657B7505B099001E5333712CA9519CB443",
+    "C0C046977344008953099BA792A50A9B9CA304DA02656ADD1C7F3DF7D90781E46CACE18B2C96A55669652B4A30391B0513344211AA6D1BEDA5BB165FE8CB3AD0",
 };

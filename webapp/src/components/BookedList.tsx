@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Timeslot } from "../types";
 import { useAccount } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { formatEther } from "viem";
 
 const BookedList: React.FC = () => {
   const { address } = useAccount();
@@ -20,28 +21,34 @@ const BookedList: React.FC = () => {
   }, [address]);
 
   return address ? (
-    <>
+    <div className="flex flex-wrap">
       {bookedList?.length ? (
-        bookedList.map(({ id, date, time }) => (
-          <button
+        bookedList.map(({ id, date, time, currency, price, callInfo }) => (
+          <div
             key={id}
             className={`card bg-base-100 shadow-md m-2 hover:shadow-xl border w-fit cursor-pointer hover:bg-base-200`}
           >
-            <div className="card-body ">
-              <div className="card-title">{date}</div>
-              <div className="card-title">{time}</div>
+            <div className="card-body items-start">
+              <div className="card-title">{`${formatEther(
+                BigInt(price)
+              )} ${currency}`}</div>
+              <div className="card-text">{`${date} at ${time}`}</div>
               <div className="card-actions justify-center">
-                <button className="btn btn-primary btn-sm ">
-                  Start meeting
-                </button>
+                <a
+                  href={callInfo || ""}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span className="btn btn-primary btn-sm ">Start meeting</span>
+                </a>
               </div>
             </div>
-          </button>
+          </div>
         ))
       ) : (
         <h3 className="font-bold text-md mt-4">You have no booked slots</h3>
       )}
-    </>
+    </div>
   ) : (
     <div className="mt-4">
       <h3 className="font-bold text-md mb-4">

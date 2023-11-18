@@ -15,9 +15,9 @@ import { ethers } from "ethers";
 import { zeroAddress } from "viem";
 
 const Profile: React.FC = () => {
-  const { address } = useAccount();
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
+  const { address } = useAccount();
   const addRecentTransaction = useAddRecentTransaction();
   const [profile, setProfile] = useState<Mentor>();
   const [searchParams] = useSearchParams();
@@ -27,11 +27,14 @@ const Profile: React.FC = () => {
 
   const tlsnVerified = searchParams.get("proof");
 
-  const updateProfile = (field: string, value: string | boolean) => {
-    if (profile) {
-      setProfile({ ...profile, [field]: value });
-    }
-  };
+  const updateProfile = useCallback(
+    (field: string, value: string | boolean) => {
+      if (profile) {
+        setProfile({ ...profile, [field]: value });
+      }
+    },
+    [profile]
+  );
 
   const onSuccessWorldID = (result: ISuccessResult) => {
     console.log(result);
@@ -99,7 +102,7 @@ const Profile: React.FC = () => {
         setWorldIdVerification(false);
       }
     },
-    [publicClient, address, addRecentTransaction, walletClient]
+    [walletClient, publicClient, address, addRecentTransaction, updateProfile]
   );
 
   const handleSaveButtonClick = async () => {
@@ -112,14 +115,14 @@ const Profile: React.FC = () => {
         publicClient,
         mentor: address,
       });
-      if (mentorsTimeAddress === zeroAddress) {
+      if (mentorsTimeAddress === zeroAddress && walletClient) {
         const mindShare = await getMindShare({ publicClient, walletClient });
         const txHash = await mindShare.write.registerMentor([displayName]);
         addRecentTransaction({
           hash: txHash,
           description: "Register mentor",
         });
-        const receipt = await publicClient.waitForTransactionReceipt({
+        await publicClient.waitForTransactionReceipt({
           hash: txHash,
           confirmations: 10,
         });

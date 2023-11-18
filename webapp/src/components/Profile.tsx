@@ -282,7 +282,7 @@ const Profile: React.FC = () => {
         console.log(e);
       }
     }
-  }, [walletClient, address, tlsnVerified]);
+  }, [walletClient, address, tlsnVerified, profile]);
 
   useEffect(() => {
     console.log("profile", profile);
@@ -385,19 +385,6 @@ const Profile: React.FC = () => {
                 </>
               )}
             </h3>
-            {profile.tlsnVerified ? (
-              <p className="text-success mt-4">
-                🎉 Twitter followers verified 🎉
-              </p>
-            ) : (
-              <a
-                href="https://twitter.com/"
-                className="btn btn-secondary max-w-xs mt-4"
-              >
-                Verify Twitter followers{" "}
-                {tlsnVerification && "- In progress..."}
-              </a>
-            )}
             {profile.humanVerified ? (
               <p className="text-success mt-4">🎉 World ID verified 🎉</p>
             ) : (
@@ -419,6 +406,19 @@ const Profile: React.FC = () => {
                   </button>
                 )}
               </IDKitWidget>
+            )}
+            {profile.tlsnVerified ? (
+              <p className="text-success mt-4">
+                🎉 Twitter followers verified 🎉
+              </p>
+            ) : (
+              <a
+                href="https://twitter.com/"
+                className="btn btn-secondary max-w-xs mt-4"
+              >
+                Verify Twitter followers{" "}
+                {tlsnVerification && "- In progress..."}
+              </a>
             )}
           </div>
         </>

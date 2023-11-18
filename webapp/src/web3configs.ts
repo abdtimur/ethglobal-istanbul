@@ -21,6 +21,9 @@ import { publicProvider } from 'wagmi/providers/public';
 
 const NAME = 'MindShare';
 
+const WC_PROJECT_ID= '69b67f11efec451f5be58fe541681209';
+const WEB3ATUH_CLIENT_ID = 'BKbSNUgwHxX8OST2UavN8SGzBptWk670aeHLZMdbyC2A1mHQH4Gsm8eu6Kv_IN_en5j68RhAomSXUbs-4nHMPBk';
+
 const { chains, publicClient } = configureChains(
   [mainnet, polygon, optimism, arbitrum, base, zora],
   [
@@ -36,7 +39,7 @@ function newWeb3AuthInstance({
   loginMethodsOrder: string[];
 }) {
   const auth = new Web3Auth({
-    clientId: 'WEB3ATUH_CLIENT_ID',
+    clientId: WEB3ATUH_CLIENT_ID,
     web3AuthNetwork: 'sapphire_devnet',
     chainConfig: {
       chainNamespace: CHAIN_NAMESPACES.EIP155,
@@ -119,10 +122,10 @@ wallets: [web3AuthWallet],
   groupName: 'Connect Wallet',
   wallets: [
     braveWallet({ chains }),
-    metaMaskWallet({ chains, projectId: 'WC_PROJECT_ID' }),
+    metaMaskWallet({ chains, projectId: WC_PROJECT_ID }),
     coinbaseWallet({ appName: 'Wingman', chains }),
-    walletConnectWallet({ chains, projectId: 'WC_PROJECT_ID' }),
-    rainbowWallet({ chains, projectId: 'WC_PROJECT_ID' }),
+    walletConnectWallet({ chains, projectId: WC_PROJECT_ID }),
+    rainbowWallet({ chains, projectId: WC_PROJECT_ID }),
     safeWallet({ chains }),
   ],
 }

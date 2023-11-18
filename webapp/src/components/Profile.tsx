@@ -373,7 +373,7 @@ const Profile: React.FC = () => {
               {attestationUID && (
                 <>
                   <span className="text-success text-xl">
-                    Boom! You are verifyed mentor!{" "}
+                    Boom! You are verified mentor!{" "}
                     <a
                       target="_blank"
                       rel="noopener noreferrer"

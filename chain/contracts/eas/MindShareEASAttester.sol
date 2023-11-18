@@ -26,7 +26,7 @@ contract MindShareEASAttester {
     /// @param twitterFollowersCount The uint32 value to indicate the number of followers.
     /// @param ownsTwitterAccount The boolean value indicating ownership of Twitter account
     /// @return The UID of the new attestation.
-    function attestUint(bytes32 schema, uint32 twitterFollowersCount, bool ownsTwitterAccount, address recipient ) external returns (bytes32) {
+    function attest(bytes32 schema, bool isMentor, address recipient ) external returns (bytes32) {
         return
             _eas.attest(
             AttestationRequest({
@@ -36,7 +36,7 @@ contract MindShareEASAttester {
                 expirationTime: NO_EXPIRATION_TIME, // No expiration time
                 revocable: true,
                 refUID: EMPTY_UID, // No references UI
-                data: abi.encode(twitterFollowersCount,ownsTwitterAccount ), // Encode a single uint256 as a parameter to the schema
+                data: abi.encode(isMentor ), // Encode a single uint256 as a parameter to the schema
                 value: 0 // No value/ETH
             })
             })

@@ -1,0 +1,9 @@
+query ExampleQuery {
+  ownershipTransferreds {
+    id,
+    newOwner,
+    transactionHash,
+    blockNumber,
+    blockTimestamp
+  }
+}

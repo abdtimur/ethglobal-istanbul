@@ -5,7 +5,7 @@ import { Env } from './config/interfaces';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix('api');
+  // app.setGlobalPrefix('api');
 
   const configService = app.get(ConfigService);
 

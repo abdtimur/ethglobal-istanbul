@@ -20,7 +20,6 @@ import {
   toBytes,
   zeroAddress,
 } from "viem";
-import { getBytecode } from "viem/actions";
 
 const Profile: React.FC = () => {
   const { data: walletClient } = useWalletClient();

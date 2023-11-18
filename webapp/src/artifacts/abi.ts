@@ -36,6 +36,25 @@ export const mindShareABI = [
     anonymous: false,
     inputs: [
       {
+        indexed: false,
+        internalType: "address",
+        name: "mentor",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "collection",
+        type: "address",
+      },
+    ],
+    name: "CollectionCreated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
         indexed: true,
         internalType: "address",
         name: "previousOwner",

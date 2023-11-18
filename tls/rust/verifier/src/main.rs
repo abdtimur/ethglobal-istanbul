@@ -352,4 +352,7 @@ pub struct TwitterUserByScreenNameRespDataUserResultLegacy {
     pub created_at: String,
     pub default_profile: bool,
     pub followers_count: u64,
+    pub needs_phone_verification: Option<bool>,
+    pub followed_by: Option<bool>,
+    pub following: Option<bool>,
 }

@@ -5,12 +5,11 @@ import {
   tlsnVerificatorABI,
   worldIdVerificatorABI,
 } from "../artifacts/abi";
-
-const MINDSHARE_ADDRESS = "0xEBB0057E6045132ed1Bad6844Eea19825d17a454";
+import { MINDSHARE_ADDR, TLSN_ADDR, WORLDID_ADDR } from "./consts";
 
 export async function getMindShare({
   publicClient,
-  address = MINDSHARE_ADDRESS,
+  address = MINDSHARE_ADDR,
   walletClient,
 }: {
   publicClient: PublicClient;
@@ -52,7 +51,7 @@ export async function getWorldIdVerificator<WC extends WalletClient>({
   return getContract({
     publicClient,
     walletClient,
-    address: "0xdFB93e30DB6A3970b939ab4a007631dc045f6FDf",
+    address: WORLDID_ADDR,
     abi: worldIdVerificatorABI,
   });
 }
@@ -67,14 +66,14 @@ export async function getTlsnVerificator<WC extends WalletClient>({
   return getContract({
     publicClient,
     walletClient,
-    address: "0xe01D33a984850028bd00799DcD36fD628F997445",
+    address: TLSN_ADDR,
     abi: tlsnVerificatorABI,
   });
 }
 
 export async function getMentorsTimeAddr({
   publicClient,
-  mindShare = MINDSHARE_ADDRESS,
+  mindShare = MINDSHARE_ADDR,
   mentor,
 }: {
   publicClient: PublicClient;
@@ -96,7 +95,7 @@ export async function getMentorsTimeAddr({
 
 export async function getMentorsTimeForMentor({
   publicClient,
-  mindShare = MINDSHARE_ADDRESS,
+  mindShare = MINDSHARE_ADDR,
   mentor,
   walletClient,
 }: {

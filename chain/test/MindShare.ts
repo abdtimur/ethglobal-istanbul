@@ -15,9 +15,41 @@ describe("Fellow Deal Tests", function () {
       await MindShare.connect(owner).deploy()
     ).waitForDeployment();
 
+    // deploy verificators and set them to MindShare
+    const WorldID = await ethers.getContractFactory("WorldIdVerificator");
+    const worldIdVerificator = await (
+      await WorldID.connect(owner).deploy(
+        mindShareContract.target,
+        "0x719683F13Eeea7D84fCBa5d7d17Bf82e03E3d260",
+        "test_app",
+        "test_action"
+      )
+    ).waitForDeployment();
+
+    const Tlsn = await ethers.getContractFactory("TlsnVerificator");
+    const tlsnVerificator = await (
+      await Tlsn.connect(owner).deploy(mindShareContract.target)
+    ).waitForDeployment();
+
+    const PolygonId = await ethers.getContractFactory("PolygonIdVerificator");
+    const polygonIdVerificator = await (
+      await PolygonId.connect(owner).deploy(mindShareContract.target)
+    ).waitForDeployment();
+
     await mindShareContract
+      .connect(owner)
+      .registerVerificator(worldIdVerificator.target, 1);
+    await mindShareContract
+      .connect(owner)
+      .registerVerificator(tlsnVerificator.target, 2);
+    await mindShareContract
+      .connect(owner)
+      .registerVerificator(polygonIdVerificator.target, 3);
+
+    await worldIdVerificator
       .connect(mentor)
-      .verifyMentor(mentor.address, ethers.encodeBytes32String("Myproof"));
+      .verifyProof(false, mentor.address, 1234, 1234, [1, 2, 3, 4, 5, 6, 7, 8]);
+
     const getCollectionAddr = await mindShareContract.getMentorCollection(
       mentor.address
     );
@@ -29,6 +61,9 @@ describe("Fellow Deal Tests", function () {
     return {
       mindShareContract,
       mentorsTimeFirst,
+      worldIdVerificator,
+      tlsnVerificator,
+      polygonIdVerificator,
       owner,
       mentor,
       buyer,
@@ -49,6 +84,13 @@ describe("Fellow Deal Tests", function () {
 
       const realOwner = await mindShareContract.owner();
       expect(realOwner).to.equal(owner.address);
+
+      const humanVerified = await mentorsTimeFirst.verifyHuman();
+      expect(humanVerified).to.equal(true); // world id passed on minting
     });
+  });
+
+  describe("Golden Path", function () {
+    //
   });
 });

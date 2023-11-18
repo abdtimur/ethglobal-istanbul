@@ -23,7 +23,7 @@ const Profile: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [worldIdVerification, setWorldIdVerification] = useState(false);
 
-  const tlsnModal = useRef<HTMLDialogElement>(null);
+  const verificationModal = useRef<HTMLDialogElement>(null);
 
   const tlsnVerified = searchParams.get("proof");
 
@@ -53,6 +53,7 @@ const Profile: React.FC = () => {
       }
 
       setWorldIdVerification(true);
+      verificationModal.current?.showModal();
       try {
         const unpackedProof = ethers.AbiCoder.defaultAbiCoder().decode(
           ["uint256[8]"],
@@ -88,26 +89,38 @@ const Profile: React.FC = () => {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ humanVerified: true }),
+            body: JSON.stringify({
+              tlsn: profile?.tlsnVerified,
+              polygonId: true,
+              human: true,
+            }),
           }
         );
 
         if (response.ok) {
-          updateProfile("human", true);
+          updateProfile("humanVerified", true);
         }
         console.log("World ID Verified!");
       } catch (err: any) {
         console.error(err.reason ?? err.message);
       } finally {
         setWorldIdVerification(false);
+        verificationModal.current?.close();
       }
     },
-    [walletClient, publicClient, address, addRecentTransaction, updateProfile]
+    [
+      walletClient,
+      publicClient,
+      address,
+      addRecentTransaction,
+      profile?.tlsnVerified,
+      updateProfile,
+    ]
   );
 
   const handleSaveButtonClick = async () => {
     const { displayName, profilePhotoUrl } = profile || {};
-
+    console.log("address", address);
     if (address) {
       // check if I see address
       // if not - register.
@@ -163,7 +176,7 @@ const Profile: React.FC = () => {
 
   useEffect(() => {
     if (tlsnVerified) {
-      tlsnModal.current?.showModal();
+      verificationModal.current?.showModal();
       try {
         const parsedTlsn = JSON.parse(tlsnVerified);
         parsedTlsn.signed_content.fact = JSON.parse(
@@ -178,12 +191,16 @@ const Profile: React.FC = () => {
               headers: {
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify({ tlsnVerified }),
+              body: JSON.stringify({
+                human: profile?.humanVerified,
+                polygonId: true,
+                tlsn: tlsnVerified,
+              }),
             }
           );
           const responseJson = await response.json();
           setProfile(responseJson);
-          tlsnModal.current?.close();
+          verificationModal.current?.close();
         };
 
         verifyTlsn();
@@ -195,10 +212,10 @@ const Profile: React.FC = () => {
 
   return address ? (
     <div className="">
-      <dialog className="modal" ref={tlsnModal}>
+      <dialog className="modal" ref={verificationModal}>
         <div className="modal-box border skeleton">
           <div className="flex flex-col">
-            <p>Verifying twitter followers...</p>
+            <p>Verification in progress...</p>
           </div>
         </div>
       </dialog>

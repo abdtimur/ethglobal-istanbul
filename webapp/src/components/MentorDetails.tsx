@@ -146,7 +146,7 @@ const MentorDetails: React.FC = () => {
             ) : (
               <>
                 <h2 className="text-xl font-bold mt-4 mb-2">
-                  Congradulations!
+                  Congratulations!
                 </h2>
                 <div>You've booked a slot!</div>
                 <Link to="/booked">

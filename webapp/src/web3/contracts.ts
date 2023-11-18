@@ -69,9 +69,8 @@ export async function getMentorsTimeAddr({
     publicClient,
     address: mindShare,
   });
-  const mentorsTimeAddress = await (
-    mindShareContract as any
-  ).read.getMentorCollection([mentor]);
+  console.log(mindShareContract)
+  const mentorsTimeAddress = await mindShareContract.read.getMentorCollection([mentor]);
   console.log("mentorsTimeAddress", mentorsTimeAddress);
   console.log(mentorsTimeAddress === zeroAddress)
   return mentorsTimeAddress;

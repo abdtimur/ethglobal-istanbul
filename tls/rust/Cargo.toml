@@ -1,6 +1,7 @@
 [workspace]
 exclude = [
   "client",
+  "notary",
 ]
 members = [
   "proxy",

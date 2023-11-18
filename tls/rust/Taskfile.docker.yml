@@ -1,0 +1,37 @@
+version: "3"
+
+set: [errexit, nounset, pipefail, xtrace]
+
+tasks:
+  notary-build:
+    dotenv: ["./notary/fork-params.env"]
+    cmds:
+      - |
+        podman build                      \
+          --build-arg TLSN_FORK_REPO      \
+          --build-arg TLSN_FORK_REV       \
+          --file docker/notary.Dockerfile \
+          --tag notary                    \
+          .
+
+  notary-save:
+    deps: [notary-build]
+    cmds:
+      - |
+        podman save                       \
+          --format docker-archive         \
+          localhost/notary                \
+          -o docker/export/notary.tar
+
+  notary-run:
+    deps: [notary-build]
+    cmds:
+      - |
+        podman run            \
+          --interactive       \
+          --tty               \
+          --name notary       \
+          --replace           \
+          --rm                \
+          --publish 7047:8080 \
+          localhost/notary

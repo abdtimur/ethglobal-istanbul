@@ -1,0 +1,18 @@
+server:
+  name: "hack-notary"
+  host: "0.0.0.0"
+  port: 8080
+
+notarization:
+  max-transcript-size: 16384
+
+# tls-signature:
+#   private-key-pem-path: "./fixture/tls/notary.key"
+#   certificate-pem-path: "./fixture/tls/notary.crt"
+
+# This will be mounted from a secret.
+notary-signature:
+  private-key-pem-path: "/debug-notary.key"
+
+tracing:
+  default-level: DEBUG

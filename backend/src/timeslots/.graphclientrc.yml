@@ -1,8 +1,8 @@
 sources:
-  - name: mindshare
+  - name: mindshare_sepolia
     handler:
       graphql:
-        endpoint: https://api.studio.thegraph.com/query/39401/mindshare/version/latest
+        endpoint: https://api.studio.thegraph.com/query/39401/mindshare_sepolia/version/latest
 
 documents:
   - query.graphql

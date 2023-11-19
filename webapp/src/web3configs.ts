@@ -20,6 +20,8 @@ import {
   polygonMumbai,
   baseGoerli,
   scrollSepolia,
+  gnosisChiado,
+  polygonZkEvmTestnet,
 } from "wagmi/chains";
 import LOGO from "./assets/google.png";
 
@@ -32,11 +34,17 @@ const WC_PROJECT_ID = "69b67f11efec451f5be58fe541681209";
 const WEB3ATUH_CLIENT_ID =
   "BKbSNUgwHxX8OST2UavN8SGzBptWk670aeHLZMdbyC2A1mHQH4Gsm8eu6Kv_IN_en5j68RhAomSXUbs-4nHMPBk";
 
-
 const { chains, publicClient } = configureChains(
-  [sepolia, polygonMumbai, baseGoerli, scrollSepolia], // arbitrum?, polygonZkEvmTestnet, gnosisChiado,
   [
-    alchemyProvider({ apiKey: '9lUw-xFV6s1Z1pX7NVEyQ1JlY2aYhp9o' }),
+    sepolia,
+    polygonMumbai,
+    baseGoerli,
+    scrollSepolia,
+    gnosisChiado,
+    polygonZkEvmTestnet,
+  ], // arbitrum?
+  [
+    alchemyProvider({ apiKey: "9lUw-xFV6s1Z1pX7NVEyQ1JlY2aYhp9o" }),
     publicProvider(),
   ]
 );

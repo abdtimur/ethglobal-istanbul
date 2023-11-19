@@ -71,9 +71,12 @@ export class TimeslotsService {
     return timeslots.map((timeslot) => new TimeslotDto(timeslot));
   }
 
-  async getTimeslotsCount(mentorAccount: string): Promise<number> {
+  async getTimeslotsCount(
+    mentorAccount: string,
+    chainId: number,
+  ): Promise<number> {
     const timeslots = await this.timeslotsRepo.find({
-      where: { mentorAccount },
+      where: { mentorAccount, chainId },
     });
 
     return timeslots.length;

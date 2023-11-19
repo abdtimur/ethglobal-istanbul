@@ -30,4 +30,16 @@ export const CHAINS_CONFIGS_LIST: ChainConfig[] = [
     worldId: "0xc3E29Ee6429a08A907A29a445A36f14C5Fd71D82",
     tlsn: "0x3047E46d68c8507F35c81131f4Db5aCfae396E1d",
   },
+  {
+    chainId: 1442,
+    mindshare: "0xEEF90A540E05c6531E2247B1b8a04faf7c1183aB",
+    worldId: "0xc60022B6C71eB3e52DEbdBDd9F5f7798e5f26Dae",
+    tlsn: "0x722F7a61d1a58d22bcEA95184a4FAadEe955F689",
+  },
+  {
+    chainId: 10200,
+    mindshare: "0xa9c715e2b231b5f2E3dA5463240F1f9C1E549c38",
+    worldId: "0xEEF90A540E05c6531E2247B1b8a04faf7c1183aB",
+    tlsn: "0xc60022B6C71eB3e52DEbdBDd9F5f7798e5f26Dae",
+  },
 ];

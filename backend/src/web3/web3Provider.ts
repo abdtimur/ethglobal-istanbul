@@ -10,6 +10,8 @@ const rpcUrls = {
   84531:
     'https://base-goerli.g.alchemy.com/v2/qzdLAg2Bk2ymTTQr7oxEvie2OynEwWLi',
   534351: 'https://sepolia-rpc.scroll.io/',
+  1442: 'https://rpc.public.zkevm-test.net',
+  10200: 'https://rpc.chiadochain.net',
 };
 
 export const MINDSHARES = {
@@ -17,7 +19,18 @@ export const MINDSHARES = {
   11155111: '0xeb1984603713C6df4E391738C89371bfCa860797',
   84531: '0x52B1279634F08F4a9c2F79bf355F48952d9D711F',
   534351: '0xa9c715e2b231b5f2E3dA5463240F1f9C1E549c38',
+  1442: '0xEEF90A540E05c6531E2247B1b8a04faf7c1183aB',
+  10200: '0xa9c715e2b231b5f2E3dA5463240F1f9C1E549c38',
 };
+
+export const CURRENCIES = {
+  80001: 'MATIC',
+  11155111: 'ETH',
+  84531: 'ETH',
+  534351: 'ETH',
+  1442: 'ETH',
+  10200: 'XDAI',
+}
 
 export function getProvider(chainId: number) {
   const chainRpc = rpcUrls[chainId];

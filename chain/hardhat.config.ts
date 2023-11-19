@@ -27,6 +27,15 @@ const config: HardhatUserConfig = {
       url: process.env.BASE_GOERLI_RPC_URL ?? "",
       accounts: [process.env.KEY_TESTIK!],
     },
+    gnosisChiado: {
+      url: "https://rpc.chiadochain.net",
+      accounts: [process.env.KEY_TESTIK!],
+      gasPrice: 1000000000,
+    },
+    zkEvmTestnet: {
+      url: "https://rpc.public.zkevm-test.net",
+      accounts: [process.env.KEY_TESTIK!],
+    },
   },
 };
 

@@ -7,6 +7,7 @@ import { verifyMentorRequest } from './requests/verify.mentor.request.dto';
 import { TimeslotsService } from '../timeslots/timeslots.service';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateMentorRequest } from './requests/create-mentor.request.dto';
+import { CURRENCIES } from '../web3/web3Provider';
 
 @Injectable()
 export class MentorsService {
@@ -85,7 +86,7 @@ export class MentorsService {
       mentor.humanVerified && mentor.tlsnVerified && mentor.polygonIdVerified;
 
     if (allVerified) {
-      const timeslotsCount = await this.timeslots.getTimeslotsCount(account);
+      const timeslotsCount = await this.timeslots.getTimeslotsCount(account, chainId);
       if (timeslotsCount === 0) {
         await this.issueNewSlots(mentor);
       }
@@ -108,7 +109,7 @@ export class MentorsService {
 
   private async issueNewSlots(mentor: Mentor): Promise<void> {
     const BASE_PRICE = '1000000000000000'; // 0.001; // TODO: Config
-    const BASE_CURRENCY = 'ETH'; // TODO: Config
+    const BASE_CURRENCY = CURRENCIES[mentor.chainId] ?? 'ETH';
     const BASE_DURATION = 30;
     const DEFAULT_SLOT = {
       price: BASE_PRICE,

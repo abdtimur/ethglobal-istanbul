@@ -1,9 +1,8 @@
 query ExampleQuery {
-  ownershipTransferreds {
-    id,
-    newOwner,
-    transactionHash,
-    blockNumber,
-    blockTimestamp
+    collectionCreateds(first: 5) {
+    id
+    mentor
+    collection
+    blockNumber
   }
 }

@@ -1,16 +1,23 @@
-# Sample Hardhat Project
+# MindShare Chain module
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+Main contract Maindshare is responsible for the following: 
+- creating new mentors 
+- initiating NFT collections for the attested mentors 
+- managing the attestation process
+- managing validators, their roles and their rewards
 
-Try running some of the following tasks:
+Other contracts are: 
+- MentorsTime: collection of mentor's booked slots which also handles an escrow and a refund process
+Each NFT first created with mentor as an owner and a call value put into escrow. 
+When a mentee books a slot, the call value is transferred to the mentor. And NFT is transfered for the person who booked the slot.
+- BaseMindVerificator: base contract for all verificators. It contains a list of all verificators and a function to add new verificators.
+- OptimisticOracleMeetingFinished: Optimistic oracle for the meeting finished event, it handles the assertion process and the dispute process.
+- MeetingDurationFunction: Chainlink function to decentralize and trustify solution on meeting status and duration. Currently used with the backend enpoint
+- IAttester: interface for the Attester contract. Attester leverages EAS to attest the identity of the mentors. Attested mentors could be listed on the mentors list and could be booked by mentees.
 
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.ts
-```
+Test & Deploy:
+- Full Golden path flow is described in the test, which allow to book and complete the slot (receive an NFT by mentee) and receive a reward by the mentor.
+- scripts folder contains scripts to deploy contracts to the testnets 
 
 **_ CHAINS _**
 

@@ -17,13 +17,9 @@ import { Web3Auth } from "@web3auth/modal";
 import { Web3AuthConnector } from "@web3auth/web3auth-wagmi-connector";
 import { Chain, configureChains, createConfig, sepolia } from "wagmi";
 import {
-  mainnet,
-  polygon,
-  optimism,
-  arbitrum,
-  base,
-  zora,
   polygonMumbai,
+  baseGoerli,
+  scrollSepolia,
 } from "wagmi/chains";
 import LOGO from "./assets/google.png";
 
@@ -38,7 +34,7 @@ const WEB3ATUH_CLIENT_ID =
 
 
 const { chains, publicClient } = configureChains(
-  [sepolia, polygonMumbai, mainnet, polygon, optimism, arbitrum, base, zora],
+  [sepolia, polygonMumbai, baseGoerli, scrollSepolia], // arbitrum?, polygonZkEvmTestnet, gnosisChiado,
   [
     alchemyProvider({ apiKey: '9lUw-xFV6s1Z1pX7NVEyQ1JlY2aYhp9o' }),
     publicProvider(),

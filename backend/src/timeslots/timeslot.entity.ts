@@ -55,11 +55,17 @@ export class Timeslot {
   // Timeslot owner:
 
   @ManyToOne(() => Mentor, (mentor) => mentor.timeslots)
-  @JoinColumn({ name: 'mentorAccount' })
+  @JoinColumn([
+    { name: 'mentorAccount', referencedColumnName: 'account' },
+    { name: 'chainId', referencedColumnName: 'chainId' },
+  ])
   mentor: Mentor;
 
   @Column('varchar')
   mentorAccount: string;
+
+  @Column({ type: 'integer', unsigned: true })
+  chainId: number;
 
   constructor(data: Partial<Timeslot>) {
     Object.assign(this, data);

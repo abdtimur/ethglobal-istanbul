@@ -14,6 +14,9 @@ export class Mentor {
   @PrimaryColumn() // address
   account: string;
 
+  @PrimaryColumn({default: 11155111}) // chainId
+  chainId: number;
+
   @Column('varchar', { nullable: true })
   displayName: string | null;
 

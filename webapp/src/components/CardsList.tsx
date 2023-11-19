@@ -2,19 +2,22 @@ import { useEffect, useState } from "react";
 import { Link, Outlet } from "react-router-dom";
 import anonimousAvatar from "../assets/anon3.png";
 import SuccessIcon from "../assets/Success.png";
+import { useChainId } from "wagmi";
 
 const CardsList: React.FC = () => {
   const [mentors, setMentors] = useState([]);
+  const chainId = useChainId();
 
   useEffect(() => {
+    const chainIdQuery = chainId ? `?chainId=${chainId}` : "";
     const getMentors = async () => {
-      const response = await fetch("https://ethg-ist.fly.dev/api/mentors");
+      const response = await fetch(`https://ethg-ist.fly.dev/api/mentors${chainIdQuery}`);
       const responseJson = await response.json();
       setMentors(responseJson);
     };
 
     getMentors();
-  }, []);
+  }, [chainId]);
   return (
     <>
       <div

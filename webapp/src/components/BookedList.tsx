@@ -1,25 +1,26 @@
 import { useEffect, useState } from "react";
 import { Timeslot } from "../types";
-import { useAccount } from "wagmi";
+import { useAccount, useChainId } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { formatEther } from "viem";
 import DoneIcon from "../assets/Done.png";
 
 const BookedList: React.FC = () => {
   const { address } = useAccount();
+  const chainId = useChainId();
 
   const [bookedList, setBookedList] = useState<Timeslot[]>([]);
 
   useEffect(() => {
     const getBookedList = async () => {
       const response = await fetch(
-        `https://ethg-ist.fly.dev/api/timeslots/my-booked?account=${address}`
+        `https://ethg-ist.fly.dev/api/timeslots/my-booked?account=${address}&chainId=${chainId}`
       );
       const responseJson = await response.json();
       setBookedList(responseJson);
     };
     getBookedList();
-  }, [address]);
+  }, [address, chainId]);
 
   return address ? (
     <div

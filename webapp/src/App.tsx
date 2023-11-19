@@ -3,15 +3,16 @@ import { Header } from "./components/Header";
 import { CardsList } from "./components/CardsList";
 import { MentorDetails } from "./components/MentorDetails";
 import { Profile } from "./components/Profile";
-import { useAccount } from "wagmi";
+import { useAccount, useChainId } from "wagmi";
 import { useEffect } from "react";
 import { BookedList } from "./components/BookedList";
 
 function App() {
   const { address } = useAccount();
+  const chainId = useChainId();
 
   useEffect(() => {
-    if (address) {
+    if (address && chainId) {
       const createProfile = async () => {
         try {
           await fetch("https://ethg-ist.fly.dev/api/mentors/create", {
@@ -19,7 +20,7 @@ function App() {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ account: address }),
+            body: JSON.stringify({ account: address, chainId }),
           });
         } catch (e) {
           console.log(e);
@@ -28,7 +29,7 @@ function App() {
 
       createProfile();
     }
-  }, [address]);
+  }, [address, chainId]);
 
   return (
     <>

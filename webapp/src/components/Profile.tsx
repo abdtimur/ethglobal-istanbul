@@ -1,6 +1,11 @@
 import { ConnectButton, useAddRecentTransaction } from "@rainbow-me/rainbowkit";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useAccount, usePublicClient, useWalletClient } from "wagmi";
+import {
+  useAccount,
+  useChainId,
+  usePublicClient,
+  useWalletClient,
+} from "wagmi";
 import type { Mentor, TlsnModel } from "../types";
 import { IDKitWidget, ISuccessResult } from "@worldcoin/idkit";
 import HelloIcon from "../assets/Hello.png";
@@ -19,6 +24,7 @@ const Profile: React.FC = () => {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
   const { address } = useAccount();
+  const chainId = useChainId();
   const addRecentTransaction = useAddRecentTransaction();
   const [profile, setProfile] = useState<Mentor>();
   const [searchParams] = useSearchParams();
@@ -65,6 +71,7 @@ const Profile: React.FC = () => {
 
         const verificator = await getWorldIdVerificator({
           publicClient,
+          chainId,
           walletClient,
         });
         const txHash = await verificator.write.verifyProof([
@@ -87,7 +94,7 @@ const Profile: React.FC = () => {
 
         console.log("Finished worldID verificatin, Updating backend...");
         const response = await fetch(
-          `https://ethg-ist.fly.dev/api/mentors/${address}/verify`,
+          `https://ethg-ist.fly.dev/api/mentors/${address}/verify?chainId=${chainId}`,
           {
             method: "POST",
             headers: {
@@ -116,6 +123,7 @@ const Profile: React.FC = () => {
       walletClient,
       publicClient,
       address,
+      chainId,
       addRecentTransaction,
       profile?.tlsnVerified,
       updateProfile,
@@ -143,6 +151,7 @@ const Profile: React.FC = () => {
 
         const verificator = await getTlsnVerificator({
           publicClient,
+          chainId,
           walletClient,
         });
 
@@ -166,7 +175,7 @@ const Profile: React.FC = () => {
 
         console.log("Finished TLSN verification, Updating backend...");
         const response = await fetch(
-          `https://ethg-ist.fly.dev/api/mentors/${address}/verify`,
+          `https://ethg-ist.fly.dev/api/mentors/${address}/verify?chainId=${chainId}`,
           {
             method: "POST",
             headers: {
@@ -195,6 +204,7 @@ const Profile: React.FC = () => {
       walletClient,
       publicClient,
       address,
+      chainId,
       addRecentTransaction,
       profile?.tlsnVerified,
       updateProfile,
@@ -205,30 +215,30 @@ const Profile: React.FC = () => {
     const { displayName, profilePhotoUrl } = profile || {};
     console.log("address", address);
     // if (address) {
-    //   // check if I see address
-    //   // if not - register.
-    // //   const mentorsTimeAddress = await getMentorsTimeAddr({
-    // //     publicClient,
-    // //     mentor: address,
-    // //   });
-    // //   if (mentorsTimeAddress === zeroAddress && walletClient) {
-    // //     const mindShare = await getMindShare({ publicClient, walletClient });
-    // //     const txHash = await mindShare.write.registerMentor([displayName]);
-    // //     addRecentTransaction({
-    // //       hash: txHash,
-    // //       description: "Register mentor",
-    // //     });
-    // //     await publicClient.waitForTransactionReceipt({
-    // //       hash: txHash,
-    // //       confirmations: 10,
-    // //     });
-    // //     console.log("Register on-chain, tx: ", txHash);
-    // //   }
+    // check if I see address
+    // if not - register.
+    //   const mentorsTimeAddress = await getMentorsTimeAddr({
+    //     publicClient,
+    //     mentor: address,
+    //   });
+    //   if (mentorsTimeAddress === zeroAddress && walletClient) {
+    //     const mindShare = await getMindShare({ publicClient, walletClient });
+    //     const txHash = await mindShare.write.registerMentor([displayName]);
+    //     addRecentTransaction({
+    //       hash: txHash,
+    //       description: "Register mentor",
+    //     });
+    //     await publicClient.waitForTransactionReceipt({
+    //       hash: txHash,
+    //       confirmations: 10,
+    //     });
+    //     console.log("Register on-chain, tx: ", txHash);
+    //   }
     // }
 
     console.log("Updating backend...");
     const response = await fetch(
-      `https://ethg-ist.fly.dev/api/mentors/${address}/verify`,
+      `https://ethg-ist.fly.dev/api/mentors/${address}/verify?chainId=${chainId}`,
       {
         method: "POST",
         headers: {
@@ -252,7 +262,7 @@ const Profile: React.FC = () => {
     if (address) {
       const getProfile = async () => {
         const response = await fetch(
-          `https://ethg-ist.fly.dev/api/mentors/${address}`
+          `https://ethg-ist.fly.dev/api/mentors/${address}?chainId=${chainId}`
         );
 
         const responseJson = await response.json();
@@ -261,7 +271,7 @@ const Profile: React.FC = () => {
 
       getProfile();
     }
-  }, [address]);
+  }, [address, chainId]);
 
   useEffect(() => {
     if (tlsnVerified && profile && !profile.tlsnVerified) {
@@ -282,6 +292,7 @@ const Profile: React.FC = () => {
       profile?.humanVerified &&
       profile?.tlsnVerified &&
       address &&
+      chainId &&
       walletClient &&
       !attestationUID
     ) {
@@ -290,6 +301,7 @@ const Profile: React.FC = () => {
       const checkAttestation = async () => {
         const contract = await getMentorsTimeForMentor({
           publicClient,
+          chainId,
           mentor: address,
           walletClient,
         });
@@ -303,6 +315,7 @@ const Profile: React.FC = () => {
     }
   }, [
     address,
+    chainId,
     attestationUID,
     profile,
     profile?.humanVerified,

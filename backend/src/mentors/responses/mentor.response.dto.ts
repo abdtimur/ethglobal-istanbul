@@ -3,6 +3,7 @@ import { Mentor } from '../mentor.entity';
 
 export class MentorDto {
   public account: string;
+  public chainId: number;
   public botId: string;
   public displayName: string;
   public profilePhotoUrl: string | null;
@@ -14,6 +15,7 @@ export class MentorDto {
 
   constructor(data: Mentor) {
     this.account = data.account;
+    this.chainId = data.chainId;
     this.displayName = data.displayName;
     this.profilePhotoUrl = data.profilePhotoUrl;
     this.tlsnVerified = data.tlsnVerified;

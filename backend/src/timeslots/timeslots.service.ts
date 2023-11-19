@@ -8,13 +8,13 @@ import { BookSlotRequest } from './requests/book-slot.request.dto';
 import { CompleteSlotRequest } from './requests/complete-slot.request.dto';
 import { ZoomService } from '../zoom/zoom.service';
 import {
+  MINDSHARES,
   getAdjustedGasPrice,
   getMentorsTimeByMentorAddress,
   getSignerWallet,
   getUmaOracle,
 } from '../web3/web3Provider';
 import { ethers } from 'ethers';
-import { CHAIN_ID, MINDSHARE_ADDR } from '../web3/consts';
 
 @Injectable()
 export class TimeslotsService {
@@ -45,18 +45,25 @@ export class TimeslotsService {
     return timeslot;
   }
 
-  async findTimeslotsForMentor(mentorAccount: string): Promise<TimeslotDto[]> {
+  async findTimeslotsForMentor(
+    mentorAccount: string,
+    chainId: number,
+  ): Promise<TimeslotDto[]> {
     const timeslots = await this.timeslotsRepo.find({
-      where: { mentorAccount },
+      where: { mentorAccount, chainId },
     });
 
     return timeslots.map((timeslot) => new TimeslotDto(timeslot));
   }
 
-  async findBookedTimeslotsForAccount(account: string): Promise<TimeslotDto[]> {
+  async findBookedTimeslotsForAccount(
+    account: string,
+    chainId: number,
+  ): Promise<TimeslotDto[]> {
     const timeslots = await this.timeslotsRepo.find({
       where: {
         account,
+        chainId,
         status: In([TimeslotStatus.Booked, TimeslotStatus.Completed]),
       },
     });
@@ -116,12 +123,12 @@ export class TimeslotsService {
 
     timeslot.duration = body.duration; // do we need to update here?
 
-    const signerWallet = getSignerWallet(CHAIN_ID);
-    const gasPrice = await getAdjustedGasPrice(CHAIN_ID);
+    const signerWallet = getSignerWallet(timeslot.chainId);
+    const gasPrice = await getAdjustedGasPrice(timeslot.chainId);
     const mentorsTime = await getMentorsTimeByMentorAddress(
-      MINDSHARE_ADDR,
+      MINDSHARES[timeslot.chainId],
       timeslot.mentorAccount,
-      CHAIN_ID,
+      timeslot.chainId,
       signerWallet,
     );
     const tx = await mentorsTime.registerMeetingEnd(

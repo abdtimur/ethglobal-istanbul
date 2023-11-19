@@ -7,6 +7,16 @@ const rpcUrls = {
   5: 'https://eth-goerli.g.alchemy.com/v2/qzdLAg2Bk2ymTTQr7oxEvie2OynEwWLi',
   11155111:
     'https://eth-sepolia.g.alchemy.com/v2/qzdLAg2Bk2ymTTQr7oxEvie2OynEwWLi',
+  84531:
+    'https://base-goerli.g.alchemy.com/v2/qzdLAg2Bk2ymTTQr7oxEvie2OynEwWLi',
+  534351: 'https://sepolia-rpc.scroll.io/',
+};
+
+export const MINDSHARES = {
+  80001: '0x5B2FE8A69573321e858C0601e5443B36f4F0f1D7',
+  11155111: '0xeb1984603713C6df4E391738C89371bfCa860797',
+  84531: '0x52B1279634F08F4a9c2F79bf355F48952d9D711F',
+  534351: '0xa9c715e2b231b5f2E3dA5463240F1f9C1E549c38',
 };
 
 export function getProvider(chainId: number) {

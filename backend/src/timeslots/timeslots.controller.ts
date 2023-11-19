@@ -23,21 +23,28 @@ export class TimeslotsController {
   constructor(private readonly timeslotsService: TimeslotsService) {}
 
   @Get('')
-  async getTimeslots(@Query('mentor') mentor: string): Promise<TimeslotDto[]> {
+  async getTimeslots(
+    @Query('mentor') mentor: string,
+    @Query('chainId') chainId: number,
+  ): Promise<TimeslotDto[]> {
     if (!mentor) {
       return [];
     }
-    return this.timeslotsService.findTimeslotsForMentor(mentor);
+    return this.timeslotsService.findTimeslotsForMentor(mentor, chainId);
   }
 
   @Get('/my-booked')
   async getBookedTimeslots(
     @Query('account') account: string,
+    @Query('chainId') chainId: number,
   ): Promise<TimeslotDto[]> {
     if (!account) {
       return [];
     }
-    return this.timeslotsService.findBookedTimeslotsForAccount(account);
+    return this.timeslotsService.findBookedTimeslotsForAccount(
+      account,
+      chainId,
+    );
   }
 
   @Get('/testPush')
@@ -138,12 +145,26 @@ export class TimeslotsController {
           'but timeslot status is not Booked',
         );
       } else if (timeslot && timeslot.status == TimeslotStatus.Booked) {
-        const updatedTimeslot = await this.timeslotsService.completeTimeslot(timeslot.id, {
-          duration: Math.ceil(Number(durationInMinutes)),
-        });
+        const updatedTimeslot = await this.timeslotsService.completeTimeslot(
+          timeslot.id,
+          {
+            duration: Math.ceil(Number(durationInMinutes)),
+          },
+        );
 
-        sendPush("Call completed", "Your call has been completed and money was transferred to the mentor.", updatedTimeslot.account);
-        sendPush("Money earned", "You have earned money "+updatedTimeslot.price+" "+updatedTimeslot.currency, updatedTimeslot.mentor);
+        sendPush(
+          'Call completed',
+          'Your call has been completed and money was transferred to the mentor.',
+          updatedTimeslot.account,
+        );
+        sendPush(
+          'Money earned',
+          'You have earned money ' +
+            updatedTimeslot.price +
+            ' ' +
+            updatedTimeslot.currency,
+          updatedTimeslot.mentor,
+        );
       }
 
       console.log('duration', durationInMinutes, 'meetingId', meetingId);

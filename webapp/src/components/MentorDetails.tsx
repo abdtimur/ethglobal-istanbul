@@ -4,12 +4,13 @@ import { Mentor } from "../types";
 
 import anonimousAvatar from "../assets/anon3.png";
 import { getMentorsTimeForMentor } from "../web3/contracts";
-import { useAccount, usePublicClient, useWalletClient } from "wagmi";
+import { useAccount, useChainId, usePublicClient, useWalletClient } from "wagmi";
 import { useAddRecentTransaction } from "@rainbow-me/rainbowkit";
 import { formatEther } from "viem";
 
 const MentorDetails: React.FC = () => {
   const publicClient = usePublicClient();
+  const chainId = useChainId();
   const addRecentTransaction = useAddRecentTransaction();
   const { data: walletClient } = useWalletClient();
   const modal = useRef<HTMLDialogElement>(null);
@@ -30,6 +31,7 @@ const MentorDetails: React.FC = () => {
     if (!mentorId || !walletClient) return;
     const contract = await getMentorsTimeForMentor({
       publicClient,
+      chainId,
       mentor: mentorId,
       walletClient,
     });
@@ -59,14 +61,14 @@ const MentorDetails: React.FC = () => {
     if (!mentorId) return;
     const getDetails = async () => {
       const response = await fetch(
-        `https://ethg-ist.fly.dev/api/mentors/${mentorId}`
+        `https://ethg-ist.fly.dev/api/mentors/${mentorId}?chainId=${chainId}`
       );
       const responseJson = await response.json();
       setDetails(responseJson);
     };
 
     getDetails();
-  }, [mentorId]);
+  }, [mentorId, chainId]);
 
   return (
     <dialog ref={modal} className="modal">

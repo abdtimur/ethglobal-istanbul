@@ -16,13 +16,15 @@ export class MentorsService {
     private readonly timeslots: TimeslotsService,
   ) {}
 
-  async checkIfExists(account: string): Promise<boolean> {
-    const mentor = await this.mentorsRepo.findOne({ where: { account } });
+  async checkIfExists(account: string, chainId: number): Promise<boolean> {
+    const mentor = await this.mentorsRepo.findOne({
+      where: { account, chainId },
+    });
     return !!mentor;
   }
 
   async initMentor(body: CreateMentorRequest): Promise<MentorDto> {
-    const ifExists = await this.checkIfExists(body.account);
+    const ifExists = await this.checkIfExists(body.account, body.chainId);
     if (ifExists) {
       throw new HttpException(
         `Mentor with account ${body.account} already exists`,
@@ -31,6 +33,7 @@ export class MentorsService {
     }
     const mentor = this.mentorsRepo.create({
       account: body.account,
+      chainId: body.chainId,
       displayName: body.displayName ?? null,
       profilePhotoUrl: body.profilePhotoUrl ?? null,
     });
@@ -40,24 +43,26 @@ export class MentorsService {
     return new MentorDto(mentor);
   }
 
-  async findAll(): Promise<MentorDto[]> {
+  async findAll(chainId: number): Promise<MentorDto[]> {
     const mentors = await this.mentorsRepo.find({
+      where: { chainId },
       relations: ['timeslots'],
     });
 
     return mentors.map((mentor) => new MentorDto(mentor));
   }
 
-  async findMentor(account: string): Promise<MentorDto> {
-    const mentor = await this.findMentorByAccount(account);
+  async findMentor(account: string, chainId: number): Promise<MentorDto> {
+    const mentor = await this.findMentorByAccount(account, chainId);
     return new MentorDto(mentor);
   }
 
   async verifyMentor(
     account: string,
+    chainId: number,
     request: verifyMentorRequest,
   ): Promise<MentorDto> {
-    const mentor = await this.findMentorByAccount(account);
+    const mentor = await this.findMentorByAccount(account, chainId);
 
     if (request.displayName) {
       mentor.displayName = request.displayName;
@@ -91,8 +96,11 @@ export class MentorsService {
     return new MentorDto(mentor);
   }
 
-  async publicIssueNewSlots(account: string): Promise<MentorDto> {
-    const mentor = await this.findMentorByAccount(account);
+  async publicIssueNewSlots(
+    account: string,
+    chainId: number,
+  ): Promise<MentorDto> {
+    const mentor = await this.findMentorByAccount(account, chainId);
     await this.issueNewSlots(mentor);
     await this.mentorsRepo.save(mentor);
     return new MentorDto(mentor);
@@ -144,9 +152,12 @@ export class MentorsService {
     mentor.timeslots = slots;
   }
 
-  private async findMentorByAccount(account: string): Promise<Mentor> {
+  private async findMentorByAccount(
+    account: string,
+    chainId: number,
+  ): Promise<Mentor> {
     const mentor = await this.mentorsRepo.findOne({
-      where: { account },
+      where: { account, chainId },
       relations: ['timeslots'],
     });
     if (!mentor) {

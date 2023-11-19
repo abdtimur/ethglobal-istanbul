@@ -5,21 +5,24 @@ import {
   tlsnVerificatorABI,
   worldIdVerificatorABI,
 } from "../artifacts/abi";
-import { MINDSHARE_ADDR, TLSN_ADDR, WORLDID_ADDR } from "./consts";
+import { CHAINS_CONFIGS_LIST, ChainConfig } from "./consts";
 
 export async function getMindShare({
   publicClient,
-  address = MINDSHARE_ADDR,
+  chainId,
   walletClient,
 }: {
   publicClient: PublicClient;
-  address?: `0x${string}`;
+  chainId: number;
   walletClient?: WalletClient;
 }) {
+  const chain: ChainConfig | undefined = CHAINS_CONFIGS_LIST.find(
+    (c) => c.chainId === chainId
+  );
   return getContract({
     publicClient,
     walletClient,
-    address,
+    address: chain!.mindshare,
     abi: mindShareABI,
   });
 }
@@ -43,46 +46,56 @@ export async function getMentorsTime({
 
 export async function getWorldIdVerificator<WC extends WalletClient>({
   publicClient,
+  chainId,
   walletClient,
 }: {
   publicClient: PublicClient;
+  chainId: number;
   walletClient?: WC;
 }) {
+  const chain: ChainConfig | undefined = CHAINS_CONFIGS_LIST.find(
+    (c) => c.chainId === chainId
+  );
   return getContract({
     publicClient,
     walletClient,
-    address: WORLDID_ADDR,
+    address: chain!.worldId,
     abi: worldIdVerificatorABI,
   });
 }
 
 export async function getTlsnVerificator<WC extends WalletClient>({
   publicClient,
+  chainId,
   walletClient,
 }: {
   publicClient: PublicClient;
+  chainId: number;
   walletClient?: WC;
 }) {
+  const chain: ChainConfig | undefined = CHAINS_CONFIGS_LIST.find(
+    (c) => c.chainId === chainId
+  );
   return getContract({
     publicClient,
     walletClient,
-    address: TLSN_ADDR,
+    address: chain!.tlsn,
     abi: tlsnVerificatorABI,
   });
 }
 
 export async function getMentorsTimeAddr({
   publicClient,
-  mindShare = MINDSHARE_ADDR,
+  chainId,
   mentor,
 }: {
   publicClient: PublicClient;
-  mindShare?: `0x${string}`;
+  chainId: number;
   mentor: `0x${string}`;
 }) {
   const mindShareContract = await getMindShare({
     publicClient,
-    address: mindShare,
+    chainId,
   });
   console.log(mindShareContract);
   const mentorsTimeAddress = await mindShareContract.read.getMentorCollection([
@@ -95,18 +108,18 @@ export async function getMentorsTimeAddr({
 
 export async function getMentorsTimeForMentor({
   publicClient,
-  mindShare = MINDSHARE_ADDR,
+  chainId,
   mentor,
   walletClient,
 }: {
   publicClient: PublicClient;
-  mindShare?: `0x${string}`;
+  chainId: number;
   mentor: `0x${string}`;
   walletClient?: WalletClient;
 }) {
   const address = (await getMentorsTimeAddr({
     publicClient,
-    mindShare,
+    chainId,
     mentor,
   })) as `0x${string}`;
 

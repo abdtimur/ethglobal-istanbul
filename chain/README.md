@@ -50,6 +50,7 @@ npx hardhat run scripts/deploy.ts
 - PolygonIdVerificator: `0xb75b977a5A45D703542316D8f66177010c085662`
 
 **GnosisChiado**
+Tweet (Xeet) with @gnosischain mention: https://twitter.com/lolchto_eth/status/1726082783632818676 ❤️ ❤️ ❤️ 
 - Attester: `0xf05F463945Be654113BE74Fa39A4D5D9606DC586`
 - MindShare: `0xa9c715e2b231b5f2E3dA5463240F1f9C1E549c38`
 - WorldIDVerificator: `0xEEF90A540E05c6531E2247B1b8a04faf7c1183aB`

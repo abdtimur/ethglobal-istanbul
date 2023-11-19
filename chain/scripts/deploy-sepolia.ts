@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { EAS_SCHEMA_SEPOLIA, EAS_SEPOLIA, WORLD_ID_MUMBAI } from "./consts";
+import { EAS_SCHEMA_SEPOLIA, EAS_SEPOLIA, WORLD_ID } from "./consts";
 
 async function onlyMindShare() {
   const worldIdVerificator = await ethers.getContractAt(
@@ -31,10 +31,14 @@ async function onlyMindShare() {
 
   console.log("MindShare deployed to:", mindShareContract.target);
 
-  console.log("Registering verificators...");
+  console.log("Registering verificators...1");
   await mindShareContract.registerVerificator(worldIdVerificator.target, 1);
 
+  console.log("Registering verificators...2");
+
   await mindShareContract.registerVerificator(tlsnVerificator.target, 2);
+
+  console.log("Registering verificators...3");
 
   await mindShareContract.registerVerificator(polygonIdVerificator.target, 3);
 
@@ -79,7 +83,7 @@ async function main() {
   // deploy verificators and set them to MindShare
   const WorldID = await ethers.getContractFactory("WorldIdVerificator");
   const worldIdVerificator = await (
-    await WorldID.deploy(mindShareContract.target, WORLD_ID_MUMBAI)
+    await WorldID.deploy(mindShareContract.target, WORLD_ID)
   ).waitForDeployment();
 
   console.log("WorldID deployed to:", worldIdVerificator.target);

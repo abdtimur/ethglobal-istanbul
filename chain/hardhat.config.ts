@@ -19,8 +19,12 @@ const config: HardhatUserConfig = {
       url: `https://rpc-mumbai.maticvigil.com`,
       accounts: [process.env.KEY_TESTIK!],
     },
-    zkEVM: {
-      url: `https://rpc.public.zkevm-test.net`,
+    scrollSepolia: {
+      url: "https://sepolia-rpc.scroll.io/" || "",
+      accounts: [process.env.KEY_TESTIK!],
+    },
+    baseGoerli: {
+      url: process.env.BASE_GOERLI_RPC_URL ?? "",
       accounts: [process.env.KEY_TESTIK!],
     },
   },
